@@ -46,15 +46,15 @@ def loadData(path, bins, string):
     # DataFrame
     binData = generateBinLabels(bins, string)
 
+    # Set the labels of DataFrame columns
     # Generate indexes of elements in columns to load, if any element is an
     # empty string do not include its index.
-    columns = binData['columns']
-    usecols = [0] + [index + 1 for index, value in enumerate(columns)
+    cols = ['DateTime'] + binData['columns']
+    usecols = [index for index, value in enumerate(cols)
                      if not value == ""]
 
     # Load data
     try:
-        cols = ['DateTime'] + columns
         df = pd.read_csv(path,
                          parse_dates={"Datetime": [0]},
                          index_col='Datetime',
@@ -438,8 +438,6 @@ def geometricStd(data, bounds, gmd):
     upper = gmd * (gsd ** 2)
 
     return gsd, lower, upper
-
-
 
 
 def stats(counts, midpoints):
