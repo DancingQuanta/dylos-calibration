@@ -42,7 +42,7 @@ print(mean)
 meandf = pd.DataFrame([mean])
 print(meandf)
 
-mean = rebinned.mean()
+mean = rebinned['data'].mean()
 print(mean)
 meandf = pd.DataFrame([mean])
 print(meandf)
