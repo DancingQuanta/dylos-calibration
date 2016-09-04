@@ -46,8 +46,7 @@ def loadSensorsData(project_dir, sensors, sensorsFile, outputConc):
         sensor_dir = settings['path']
         data_dir = os.path.join(project_dir, "data", "raw", sensor_dir)
 
-        # Generate column labels with list of given bin boundaries
-        # defined for this sensor type
+        # Fetch information about bin boundaries for this sensor
         bins = settings['bins']
 
         # Load data
@@ -81,7 +80,7 @@ def loadSensorsData(project_dir, sensors, sensorsFile, outputConc):
         scale = float((ureg(outputConc))/(ureg(inputConc)))
         print(scale)
 
-        # Mutiply the data with scale factor and update binDate dict
+        # Multiply the data with scale factor and update binDate dict
         bins['data'] = data*scale
 
         # Update settings dict with bins
