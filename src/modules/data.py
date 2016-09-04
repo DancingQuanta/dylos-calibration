@@ -303,7 +303,8 @@ def pruneBins(data):
     # prunedBins = {'columns': prunedColumns, 'bounds': prunedBounds}
     return data
 
-def rebin(bins1,bins2):
+
+def rebin(bins1, bins2):
     """Rebin binned data to new bin boundaries
 
     Args:
@@ -313,7 +314,8 @@ def rebin(bins1,bins2):
             Pandas.Series will be converted into Pandas.DataFrame before
             rebinning.
         bins1 : dict of str: list, str: list, str: Pandas.DataFrame
-            Input dict with three key-value pairs; 'columns', 'bounds' and 'data' .
+            Input dict with three key-value pairs; 'columns', 'bounds' and
+            'data'.
 
             Value of 'columns' is list of strings of labels of bin columns
             which is {sensor name}-{lower bin boundary}
@@ -347,10 +349,38 @@ def rebin(bins1,bins2):
 
     # Initialise new dataframe
     bins2['data'] = pd.DataFrame(0, index=bins1['data'].index, columns=bins2['columns'])
+
+    # Ensure the lower boundary of lowest bin and upper boundary of
+    # highest bin of new bin list is within the limits of old bin list
+    if bins2['bounds'][0] < bins1['bounds'][0]:
+        msg = ("The lower boundary of new bottommost bin (%s)"
+               "is lower then the lower boundary of old mottommost"
+               "bin (%s)" % (bins2['bounds'][0], bins1['bounds'][0]))
+        raise ValueError(msg)
+    if bins2['bounds'][-1] > bins1['bounds'][-1]:
+        msg = ("The upper boundary of new topmost bin (%s)"
+               "is higher then the upper boundary of old topmost"
+               "bin (%s)" % (bins2['bounds'][-1], bins1['bounds'][-1]))
+        raise ValueError(msg)
+
     for ix2, key2 in enumerate(bins2['columns']):
         for ix1, key1 in enumerate(bins1['columns']):
             lower1 = bins1['bounds'][ix1]
             upper1 = bins1['bounds'][ix1+1]
-            diff1 = upper1 - lower1
             lower2 = bins2['bounds'][ix2]
+            upper2 = bins2['bounds'][ix2+1]
+            diff1 = upper1 - lower1
+            # print("lower1: %s, upper1: %s, lower2: %s, upper2: %s"
+                # % (lower1, upper1, lower2, upper2))
 
+            if lower2 < upper1:
+                if lower2 <= lower1 < upper2:
+                    if upper2 >= upper1:
+                        bins2['data'][key2] += bins1['data'][key1]
+                    if upper2 < upper1:
+                        diff = upper2 - lower1
+                        bins2['data'][key2] += bins1['data'][key1]*(diff/diff1)
+                if lower2 > lower1:
+                    diff = upper1 - lower2
+                    bins2['data'][key2] += bins1['data'][key1]*(diff/diff1)
+    return bins2
