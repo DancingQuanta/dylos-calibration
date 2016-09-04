@@ -8,6 +8,8 @@ import json
 import yaml
 import argparse
 from pint import UnitRegistry
+matplotlib.style.use('ggplot')
+pd.options.display.float_format = '{:.2f}'.format
 
 # matplotlib settings
 params = {'backend': 'pdf',
