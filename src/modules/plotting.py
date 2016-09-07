@@ -2,17 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-# Data Analysis for aerosol sensors in a box
+# Plotting helper functions
 
-Sources of advice
-http://stackoverflow.com/questions/2154249/identify-groups-of-continuous-numbers-in-a-list
 """
 
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from modules.statistics import *
+from statistics import *
 
 
 def plot(data, path, name):
