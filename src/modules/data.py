@@ -17,6 +17,14 @@ import pandas as pd
 import datetime as dt
 
 
+def date_handler(obj):
+    # Handles datetime object before json serialising it
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    # else:
+        # raise TypeError
+
+
 def loadData(path, bins, string):
     """Load binned data into a Pandas.DataFrame where first column is datetime,
     each columns represent a bin and name each column according to a list of

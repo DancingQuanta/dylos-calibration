@@ -1,9 +1,3 @@
-def date_handler(obj):
-    # Handles datetime object before json serialising it
-    if hasattr(obj, 'isoformat'):
-        return obj.isoformat()
-    # else:
-        # raise TypeError
 # def changeExt(path, ext):
     filename = os.path.basename(path)
     filename = os.path.splitext(filename)[0]+ext
