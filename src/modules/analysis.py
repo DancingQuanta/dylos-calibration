@@ -10,7 +10,121 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from statistics import *
+
+def nmoment(x, counts, c, n):
+    return np.sum(((x-c)**n)*counts) / np.sum(counts)
+
+def stats(midpoints, counts):
+    """Statistics for binned data
+
+    Args:
+        counts: ndarray
+        midpoints: adarray
+
+    Returns:
+
+    """
+    totalCounts = np.sum(counts)
+    # Mean
+    mean = nmoment(midpoints, counts, 0, 1)
+
+    # Standard deviation
+    std = nmoment(midpoints, counts, mean, 2)
+
+    # Lower 95% bounds
+    lower = mean - 2 * std
+
+    # Upper 95% bounds
+    upper = mean + 2 * std
+
+    return mean, std, lower, upper
+
+
+def histstd(data, bounds, mean):
+    """Calculate standard deviation of a binned data
+    Args:
+        data : list
+            list of counts per bin
+        bins : list
+            list of bin boundaries, with length one element longer than data
+        mean : float
+
+    Returns:
+        std : float
+            Standard deviation
+    """
+    numerator = 0
+    totalCounts = 0
+    for ix, key in enumerate(data):
+        counts = data[ix]
+        lower = bounds[ix]
+        upper = bounds[ix+1]
+        difference = upper-lower
+        midpoint = lower + difference/2
+        totalCounts = totalCounts + counts
+        numerator = counts * ((midpoint - mean) ** 2) + numerator
+
+    denominator = totalCounts
+    std = np.sqrt(numerator / denominator)
+    return std, lower, upper
+
+
+def normalise(data, bins):
+    for key in bins:
+        value = bins[key]
+        if isinstance(value,  tuple):
+            if len(value) == 2:
+                lower = value[0]
+                upper = value[1]
+                difference = upper-lower
+                data[key] = data[key]/difference
+            else:
+                error = "The length of value of the key %s is %s,  must be 2" % (key, len(value))
+                print(error)
+        else:
+            error = "The type of value of the key %s is %s,  must be tuple e.g. (1, 2)" % (key, type(value))
+            print(error)
+    return data
+
+
+def geometricStd(data, bounds, gmd):
+    """Calculate geometric standard deviation of a lognormal distribution
+    Args:
+        data : list
+            list of counts per bin
+        bins : list
+            list of bin boundaries, with length one element longer than data
+        gmd : float
+            Geometric mean diameter
+
+    Returns:
+        gsd : float
+            Geometric standard deviation
+    """
+    # Geometric standard deviation
+    numerator = 0
+    totalCounts = 0
+    for ix, key in enumerate(data):
+        counts = data[ix]
+        lower = bounds[ix]
+        upper = bounds[ix+1]
+        difference = upper-lower
+        midpoint = lower + difference/2
+        logmidpoint = np.log10(midpoint)  # Is this correct? todo
+        totalCounts = totalCounts + counts
+        numerator = counts * ((logmidpoint - np.log10(gmd)) ** 2) + numerator
+
+    denominator = totalCounts - 1
+    loggsd = np.sqrt(numerator / denominator)
+    gsd = np.exp(loggsd)
+
+    # Lower 95% bounds
+    lower = gmd / (gsd ** 2)
+
+    # Upper 95% bounds
+    upper = gmd * (gsd ** 2)
+
+    return gsd, lower, upper
 
 
 def plot(data, path, name):
@@ -95,15 +209,14 @@ def histogram(data, path, name):
 
     # Statistics
     counts = df1['Counts'].values
-    midpints = df1["midpoint"].values
-    midpoints = np.diff(bounds)/2 + bounds[:-1]
-    logmidpoints = np.log10(midpoints)
+    midpoints = df1["midpoint"].values
+    # logmidpoints = np.log10(midpoints)
 
     # Normal distribution
-    mean, std, lower, upper = stats(counts, midpoints)
+    mean, std, lower, upper = stats(midpoints, counts)
 
     # Log normal distribution
-    gm, gstd, glower, gupper = np.exp(stats(counts, np.log(midpoints)))
+    gm, gstd, glower, gupper = np.exp(stats(np.log(midpoints), counts))
 
     # Sometimes a median is not found and so need to be excluded from display
     if 'median' in locals():
