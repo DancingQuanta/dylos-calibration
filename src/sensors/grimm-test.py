@@ -4,6 +4,7 @@
 import os
 from src.modules.data import *
 from src.modules.calibration import *
+from src.modules.analysis import *
 from datetime import datetime as dt
 
 start = dt(2016, 7, 4, 10, 30)
@@ -42,8 +43,15 @@ print(mean)
 meandf = pd.DataFrame([mean])
 print(meandf)
 
+counts = mean.values
+bounds = bins['bounds']
+midpoints = np.diff(bounds)/2 + bounds[:-1]
+print(stats(midpoints, counts))
+
 mean = rebinned['data'].mean()
 print(mean)
 meandf = pd.DataFrame([mean])
 print(meandf)
+
+
 
