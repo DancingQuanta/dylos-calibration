@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-# Data Analysis for aerosol sensors in a box
+# Data manupulation for aerosols in the box.
+Ensure you have install rebin module.
 
 Sources of advice
 http://stackoverflow.com/questions/2154249/identify-groups-of-continuous-numbers-in-a-list
@@ -15,6 +16,7 @@ import sys
 import numpy as np
 import pandas as pd
 import datetime as dt
+from rebin import *
 
 
 def date_handler(obj):
@@ -49,8 +51,7 @@ def loadData(path, bins, string):
     # Generate indexes of elements in columns to load, if any element is an
     # empty string do not include its index.
     cols = ['DateTime'] + binData['columns']
-    usecols = [index for index, value in enumerate(cols)
-               if not value == ""]
+    usecols = [0] + [x + 1 for x in binData['index']]
 
     # Load data
     try:
@@ -101,24 +102,29 @@ def generateBinLabels(binsList, string):
     """
     columns = []
     stringBins = []
-    for key in binsList[:-1]:
-        if isinstance(key, (int, float)):
-            columns = columns + ["%s-%s" % (string, key)]
-            stringBins = stringBins + ["%s/ " % (key)]
-        else:
-            columns = columns + [""]
+    newBinsList = []
+    chosen_index = []
 
-    # Remove any non-integer elements
-    binsList = [key for key in binsList
-                if isinstance(key, (int, float))]
+    for ix, val in enumerate(binsList):
+        if isinstance(val, (int, float)):
+            chosen_index = chosen_index + [ix]
+            columns = columns + ["%s-%s" % (string, val)]
+            stringBins = stringBins + ["%s/ " % (val)]
+            newBinsList = newBinsList + [val]
+
+    # Drop last element
+    chosen_index = chosen_index[:-1]
+    columns = columns[:-1]
+    stringBins = stringBins[:-1]
 
     # Return dict of bin labels and bin value lists
-    bins = {'columns': columns, 'bounds': binsList, 'stringbins': stringBins}
+    bins = {'columns': columns, 'stringbins': stringBins,
+            'bounds': newBinsList, 'index': chosen_index}
     return bins
 
 
 def writeData(df, path, filename):
-    """Write Pandas.DataFrame to file
+    """Write Pandas.DataFrame to csv file
     Args:
         df: Pandas.DataFrame
         path: string
@@ -188,7 +194,7 @@ def findGaps(data):
 
 def segments(data, path, name):
     """
-    Group non-null values into segments
+    Group non-null values into segments and write them to file
     """
     try:
         if isinstance(data,  pd.DataFrame):
@@ -238,6 +244,12 @@ def difference(df):
 
 
 def concat(df1, df2):
+    """Concatenate two Pandas.DataFrames together.
+    The first dataframe's index will be used to set the index of second if the
+    length of the indexes are equal.
+    Different length dataframes can be concatanced together, where the shorted
+    index is used.
+    """
     if len(df1) == len(df2):
         df2.index = df1.index
         df = df1.join(df2)
@@ -259,7 +271,9 @@ def concat(df1, df2):
 
 
 def realCounts(data):
-    # Get number of columns,  loop over,  sum upper and subtract from lower
+    """Subtract the upper bins from the lower bins
+    """
+    # Get number of columns, loop over, sum upper and subtract from lower.
     columns = data.columns
     for i in range(0, len(columns)):
         sumup = data[columns[(i+1):]].sum(axis=1)
@@ -272,16 +286,22 @@ def pruneBins(data):
 
     Args:
         data : dict
-            This dictionary must contain at least the Panda.DataFrame of binned
-            data and a list of floats of bin boundaries.
-            The DataFrame have index of datetime object and each column is a
-            bin od data.
+            Input dict with three key-value pairs; 'columns', 'bounds' and
+            'data'.
+            Value of 'columns' is list of strings of labels of bin columns
+            which is {sensor name}-{lower bin boundary}
+
+            Value of 'bounds' is list of low bin boundary positions, with the
+            last element being the top boundary of last bin.
+
+            Value of 'data' is Pandas.DataFrame where the column labels are
+            same as 'columns'
 
     Returns:
-        df : Pandas.DataFrame
-            Output copy of Input dataframe minus dropped bins
-        newBins : dict of str: tuple
-            Outpuf dict of column labels and bin boundaries
+        data; dict
+            The output will have same structure as input dict.
+            The dataframe will have fewer columns, and the list of bin
+            boundaries would be shorter.
 
     """
     df = data['data']
@@ -305,22 +325,14 @@ def pruneBins(data):
     data['columns'] = prunedColumns
     data['bounds'] = data['bounds'][:len(prunedColumns)+1]
     data['data'] = df
-
-    # prunedColumns = [key for key in binsList if key not in zeroColumns]
-    # prunedBounds = bounds[:len(prunedColumns)+1]
-    # prunedBins = {'columns': prunedColumns, 'bounds': prunedBounds}
     return data
 
 
 def rebin(bins1, bins2):
-    """Rebin binned data to new bin boundaries
+    """Rebin binned data to new bin boundaries.
+    Uses the rebin_piecewise_constant function from jhykes/rebin github repo.
 
     Args:
-        df1 : Pandas.DataFrame or Pandas.Series
-            Each column of DataFrame is a bin of data.
-            This Dataframe is to be rebinned.
-            Pandas.Series will be converted into Pandas.DataFrame before
-            rebinning.
         bins1 : dict of str: list, str: list, str: Pandas.DataFrame
             Input dict with three key-value pairs; 'columns', 'bounds' and
             'data'.
@@ -351,13 +363,6 @@ def rebin(bins1, bins2):
     label = string[0]
     bins2 = generateBinLabels(bins2, label)
 
-    # Check for a series or dataframe
-    if isinstance(bins1['data'], pd.Series):
-        bins1['data'] = pd.DataFrame([bins1['data']])
-
-    # Initialise new dataframe
-    bins2['data'] = pd.DataFrame(0, index=bins1['data'].index, columns=bins2['columns'])
-
     # Ensure the lower boundary of lowest bin and upper boundary of
     # highest bin of new bin list is within the limits of old bin list
     if bins2['bounds'][0] < bins1['bounds'][0]:
@@ -371,24 +376,24 @@ def rebin(bins1, bins2):
                "bin (%s)" % (bins2['bounds'][-1], bins1['bounds'][-1]))
         raise ValueError(msg)
 
-    for ix2, key2 in enumerate(bins2['columns']):
-        for ix1, key1 in enumerate(bins1['columns']):
-            lower1 = bins1['bounds'][ix1]
-            upper1 = bins1['bounds'][ix1+1]
-            lower2 = bins2['bounds'][ix2]
-            upper2 = bins2['bounds'][ix2+1]
-            diff1 = upper1 - lower1
-            # print("lower1: %s, upper1: %s, lower2: %s, upper2: %s"
-                # % (lower1, upper1, lower2, upper2))
+    # Assign bin boundaries
+    x1 = np.array(bins1['bounds'])
+    x2 = np.array(bins2['bounds'])
 
-            if lower2 < upper1:
-                if lower2 <= lower1 < upper2:
-                    if upper2 >= upper1:
-                        bins2['data'][key2] += bins1['data'][key1]
-                    if upper2 < upper1:
-                        diff = upper2 - lower1
-                        bins2['data'][key2] += bins1['data'][key1]*(diff/diff1)
-                if lower2 > lower1:
-                    diff = upper1 - lower2
-                    bins2['data'][key2] += bins1['data'][key1]*(diff/diff1)
+    # Check if input data is a series or dataframe
+    if isinstance(bins1['data'], pd.Series):
+        y1 = bins1['data'].values
+        y2 = rebin_piecewise_constant(x1, y1, x2)
+        # Initialise new dataframe
+        bins2['data'] = pd.Series(y2, index=bins2['columns'])
+    elif isinstance(bins1['data'], pd.DataFrame):
+        index = bins1['data'].index
+        columns = bins2['columns']
+        # Initialise new dataframe
+        bins2['data'] = pd.DataFrame(0, index=index, columns=columns)
+        for ix in index:
+            y1 = bins1['data'].loc[ix].values
+            y2 = rebin_piecewise_constant(x1, y1, x2)
+            bins2['data'].loc[ix] = y2
+
     return bins2
