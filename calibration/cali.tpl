@@ -5,7 +5,7 @@
 \usepackage[english]{babel} % English language/hyphenation
 
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage[utf8x]{inputenc}
 \usepackage[mono=false]{libertine}
 \usepackage[scaled=0.85]{beramono}%% or 0.82
 \usepackage{verbatim}
@@ -97,42 +97,42 @@ Flow rate &
 \section{\VAR{item}}
 \subsection{\VAR{calibrater['name']}}
 \begin{tabular}{MM}
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibrater']['plot']}} &
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibration']['plot']}} \\
+\input{\VAR{exp['conditions'][item]['data']['calibrater']['plot']}} &
+\input{\VAR{exp['conditions'][item]['data']['calibration']['plot']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['hist']}} &
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['hist']}} &
+\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histdata']} &
-\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histstats']} \\
+\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histdata']}} &
+\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histstats']}} \\
 \end{tabular}
 
 \subsection{\VAR{calibratee['name']}}
 \begin{tabular}{MM}
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['hist']}} &
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['hist']}} &
+\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histdata']} &
-\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histstats']} \\
+\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histdata']}} &
+\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histstats']}} \\
 \end{tabular}
 
 \subsection{\VAR{rebinned['name']}}
 \begin{tabular}{MM}
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['hist']}} &
-\includegraphics[width=0.5\textwidth]{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['hist']}} &
+\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histdata']} &
-\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histstats']} \\
+\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histdata']}} &
+\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histstats']}} \\
 \end{tabular}
 \clearpage
 \BLOCK{endfor}
 
 \section{Calibration}
 
-\VAR{exp['calibration']}
+\input{\VAR{exp['calibration']}}
 
 \end{document}
