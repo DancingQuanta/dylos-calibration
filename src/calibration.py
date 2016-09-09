@@ -38,7 +38,7 @@ params = {                      # setup matplotlib to use latex for output
     "legend.fontsize": 8,               # Make the legend/label fonts a little smaller
     "xtick.labelsize": 8,
     "ytick.labelsize": 8,
-    "figure.figsize": figsize(0.45),     # default fig size of 0.9 textwidth
+    "figure.figsize": figsize(0.49),     # default fig size of 0.9 textwidth
     "pgf.preamble": [
         r"\usepackage[utf8x]{inputenc}",    # use utf8 fonts becasue your computer can handle it :)
         r"\usepackage[T1]{fontenc}",        # plots will be generated using this preamble
@@ -184,11 +184,17 @@ def experiments(expDict, sensors):
     order = expDict['order']
     conditions = expDict['conditions']
 
+    # Concat rebinned data with calibratee data
+    calibraterData = sensors['rebinned']['sensor']['bins']['data']
+    calibrateeData = sensors['calibratee']['sensor']['bins']['data']
+    calibrationData = concat(calibrateeData, calibraterData)
+    calibrated = calibrate(calibrationData)
+
     # Initialise a DataFrame to store mean particle counts of each experiment for
     # a calibratee and rebinned calibrater
-    # index = order
-    # columns = calibrationData.columns
-    calibration = pd.DataFrame()
+    index = order
+    columns = calibrated.columns
+    calibration = pd.DataFrame(index=index, columns=columns)
     caliName = sensors['calibrater']['name'] + "-" + sensors['calibratee']['name']
 
     logging.debug("Experiment time")
@@ -266,13 +272,18 @@ def experiments(expDict, sensors):
             logging.debug("Calibrating")
             df = calibrationData.loc[start:end]
             dict = {}
-            dict['plot'] = plot(df, imgs_dir, caliName)
+            calibratee = sensors['calibratee']['sensor']['bins']['columns']
+            calibrater = sensors['rebinned']['sensor']['bins']['columns']
+            columns = calibrater + calibratee
+            dict['plot'] = plot(df[columns], imgs_dir, caliName)
 
             # Calculate calibration factors
-            calibrated = calibrate(df)
-            print(calibrated)
-            calibration.loc[exp] = calibrated
+            mean = calibrated.loc[start:end].mean()
+            print(mean)
+            calibration.loc[exp] = mean
+            print(calibration)
             condition['data']['calibration'] = dict
+            del sample
 
         except Exception as e:
             del conditions[exp]
