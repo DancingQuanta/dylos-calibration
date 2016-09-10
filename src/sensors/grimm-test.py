@@ -2,23 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pandas as pd
+from rebin import *
 from src.modules.data import *
-from src.modules.calibration import *
 from src.modules.analysis import *
+from grimm import rebinGrimm
 from datetime import datetime as dt
+from copy import deepcopy
 
 start = dt(2016, 7, 4, 10, 30)
 end = dt(2016, 7, 4, 10, 35)
 
-print("Grimm")
+print("grimm")
 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir,
                                            os.pardir))
 
-path = os.path.join(project_dir, "data", "raw", "grimm.log")
+path = os.path.join(project_dir, "data", "raw", "dylos-grimm", "grimm.log")
 
 # Fetch information about bin boundaries for this sensor
-bins = ['', 0.3, 0.4, 0.5, 0.65, 0.8, 1, 1.6, 2, 3, 4, 5, 7.5, 10, 15, 20, 30]
+bins = ['', '', '', 0.5, 0.65, 0.8, 1, 1.6, 2, 3, 4, 5, 7.5, 10, '', '', '']
 
 # Load data
 bins = loadData(path, bins, "grimm")
@@ -29,29 +32,52 @@ data = bins['data'].loc[start:end]
 # Resample data
 data = data.resample('T',label='left', closed='left').mean()
 
-# Grimm data is shifted 7 minutes ahead.
+# grimm data is shifted 7 minutes ahead.
 data.index = data.index - pd.DateOffset(minutes=7)
 
-# New bin boundaries
+del bins['data']
+bins['data'] = data
+
+# Print original data
+
+print("Original Data")
+# print(data)
+
+print("Mean of original data")
+meanOrig = data.mean()
+bins['mean'] = meanOrig
+print(meanOrig)
+print("Sum of mean of original data")
+print(meanOrig.sum())
+
+# print("Statistics of original data")
+# midpoints = np.diff(bins['bounds'])/2 + bins['bounds'][:-1]
+# print(statistics(midpoints, meanOrig.values))
+# plotPath = plot(data, '.', "grimm")
+
+# Rebin
+
 bins2 = [0.5,2.5,10]
 
-# Rebin grimm data to different bin boundaries
-rebinned = rebin(bins, bins2)
+# Manual rebinning
 
-mean = data.mean()
-print(mean)
-meandf = pd.DataFrame([mean])
-print(meandf)
+print("Manual rebinning")
+bins1 = deepcopy(bins)
+print("Input data")
+print(bins1['data'])
+rebinned = rebinGrimm(bins1['data'])
+print("Output data")
+print(rebinned)
+print(rebinned.sum())
 
-counts = mean.values
-bounds = bins['bounds']
-midpoints = np.diff(bounds)/2 + bounds[:-1]
-print(stats(midpoints, counts))
-
-mean = rebinned['data'].mean()
-print(mean)
-meandf = pd.DataFrame([mean])
-print(meandf)
-
-
+# Rebin
+del bins1
+print("Rebin algorithm")
+bins1 = deepcopy(bins)
+print("Input data")
+print(bins1['data'])
+rebinned = rebin(bins1, bins2)
+print("Output")
+print(rebinned['data'])
+print(rebinned['data'].sum())
 
