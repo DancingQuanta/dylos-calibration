@@ -8,7 +8,6 @@ import yaml
 import argparse
 from src.modules.data import *
 from src.modules.analysis import *
-from src.modules.calibration import *
 from datetime import datetime, timedelta
 from pint import UnitRegistry
 import copy
@@ -139,6 +138,7 @@ def loadSensorsData(sensors, sensorsFile, outputConc):
         # Scaling and unit conversion of particle concentration
         inputConc = settings['concentration']
         scale = float((ureg(outputConc))/(ureg(inputConc)))
+        settings['scale factor'] = scale
 
         # Multiply the data with scale factor and update binDate dict
         bins['data'] = data*scale
@@ -279,9 +279,7 @@ def experiments(expDict, sensors):
 
             # Calculate calibration factors
             mean = calibrated.loc[start:end].mean()
-            print(mean)
             calibration.loc[exp] = mean
-            print(calibration)
             condition['data']['calibration'] = dict
             del sample
 
