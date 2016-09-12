@@ -68,14 +68,14 @@ base_processed_data_dir = os.path.join(project_dir, "data", "processed",
 if not os.path.isdir(base_processed_data_dir):
     os.makedirs(base_processed_data_dir)
 
+# Initialise pint's UnitRegistry
+ureg = UnitRegistry()
+
 
 def loadSensorsData(sensors, sensorsFile, outputConc):
     # Load sensors definitions
     with open(sensorsFile) as handle:
         sensorDefinition = yaml.load(handle)
-
-    # Initialise pint's UnitRegistry
-    ureg = UnitRegistry()
 
     debug = ("Loading sensor data")
     logging.debug(debug)
@@ -136,14 +136,19 @@ def loadSensorsData(sensors, sensorsFile, outputConc):
             logging.debug(debug)
 
         # Scaling and unit conversion of particle concentration
-        inputConc = settings['concentration']
-        scale = float((ureg(outputConc))/(ureg(inputConc)))
+        inputConc = ureg(settings['concentration'])
+        scale = float(outputConc / inputConc)
         settings['scale factor'] = scale
 
         # Multiply the data with scale factor and update binDate dict
         bins['data'] = data*scale
         debug = "The scaling factor is %s" % (scale)
         logging.debug(debug)
+
+        # Calculate count rate
+        flowrate = ureg(settings['flow rate'])
+        countrate = (flowrate * inputConc).to('counts per min')
+        settings['count rate'] = str('{:.03f}'.format(countrate))
 
         # Update settings dict with bins
         settings['bins'] = bins
@@ -315,7 +320,7 @@ if __name__ == '__main__':
         settings = yaml.load(handle)
 
     # Final particle concentration
-    outputConc = settings['output']['concentration']
+    outputConc = ureg(settings['output']['concentration'])
 
     # Sensors
     sensorsDict = settings['sensors']
