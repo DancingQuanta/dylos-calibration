@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Aerosol measurement calibration of Dylos documentation!
-======================================================
+=======================================================
 
 This project directory hosts the documentation for this project, Python scripts for analysis and report generation.
 The documentation, including this page, describes the project and its objectives.
@@ -24,8 +24,8 @@ Contents:
    particles
    sensors/index
    electronics/index
-   experiments/index
    analysis
+   calibration/index
 
 
 Indices and tables
