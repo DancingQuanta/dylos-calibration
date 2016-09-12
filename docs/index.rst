@@ -20,7 +20,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   objectives
    particles
    sensors/index
    electronics/index
