@@ -35,12 +35,14 @@ Default bin boundaries
 
 Through the `py-opc` module, I am able to get configuration of the sensor from its onboard memory.
 Part of that configuration is the bin boundaries which are ADC values and included in the py-opc module is a lookup table between ADC and micrometers particle size.
+The sensor reports the boundaries of the right side of bins between 0.38 and 17.5 um.
 
 The bin boundaries in micrometers are
 
 .. hlist::
-  :columns: 8
+  :columns: 9
 
+  - 0.38
   - 0.54
   - 0.78
   - 1.05
@@ -56,7 +58,7 @@ The bin boundaries in micrometers are
   - 12.0
   - 14.0
   - 16.0
-  - 17.0
+  - 17.5
 
 where the all except last is lower bin boundaries and the last value is upper bin boundary.
 
