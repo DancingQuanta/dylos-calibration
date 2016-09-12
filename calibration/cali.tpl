@@ -71,10 +71,12 @@
 
 \begin{document}
 \maketitle
-This summary report showing the calibration of \VAR{calibratee['sensor']['name']} by \VAR{calibrater['sensor']['name']}
+This summary report showing the calibration of \VAR{calibratee['sensor']['name']} by \VAR{calibrater['sensor']['name']}.
+Each of these sensors have different properties such as air flow air and particle concentration units.
+The concentration of the particles measured by the sensors will be converted to \VAR{output['concentration']}.
 
 \begin{center}
-\begin{tabular}{m{0.25\textwidth}CC}
+\begin{tabular}{m{0.3\textwidth}CC}
 & \VAR{calibrater['sensor']['name']} & \VAR{calibratee['sensor']['name']} \\
 Number of size channels & 
 \VAR{calibrater['sensor']['bins']['stringbins']|length} &
@@ -86,8 +88,15 @@ Concentration &
 \VAR{calibrater['sensor']['concentration']} &
 \VAR{calibratee['sensor']['concentration']} \\
 Flow rate &
-\VAR{calibrater['sensor']['flowrate']} &
-\VAR{calibratee['sensor']['flowrate']} \\
+\VAR{calibrater['sensor']['flow rate']} &
+\VAR{calibratee['sensor']['flow rate']} \\
+Count rate &
+\VAR{calibrater['sensor']['count rate']} &
+\VAR{calibratee['sensor']['count rate']} \\
+
+Scale factor of input concentration to \VAR{output['concentration']} &
+\VAR{calibrater['sensor']['scale factor']} &
+\VAR{calibratee['sensor']['scale factor']} \\
 \end{tabular}
 \end{center}
 
