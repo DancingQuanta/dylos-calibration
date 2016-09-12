@@ -1,4 +1,4 @@
-Calibration of Dylos against various sensors
+Data Analysis
 ============================================
 
 The script `calibration.py` in `src` analyse the data from two sensors, one sensor to be calibrated and other sensor as a reference.
@@ -45,23 +45,23 @@ The data from JSON file will be put in relevant places in the template.
 
   Root configuration for sensors such as calibrater and calibratee.
 
-- `calibrater`
+.. py:attribute:: calibrater
 
   A reference sensor which a calibratee will be calibrated against.
 
-- `calibratee`
+.. py:attribute:: calibratee
 
   A sensor which will be calibrated by a calibrater
 
-- 'type'
+.. py:attribute:: type
 
   Set the type of the sensor so that the relevant information about the sensor can be fetched from `sensors.yaml` for use in data analysis.
 
-- `path`
+.. py:attribute:: path
 
   Relative path from `data/raw` to the dataset produced by a sensor.
 
-- `timeshift`
+.. py:attribute:: timeshift
 
   If a dataset is not aligned in time, then the time could be shifted.
   
@@ -69,12 +69,11 @@ The data from JSON file will be put in relevant places in the template.
 
   For positive shift use the value `+00:00:00`
 
-- `resample: minute`
+.. py:attribute:: resample: minute
 
   Resamples a dataset to different time frequency such as minutes.
 
-
-- `prunebins`
+.. py:attribute:: prunebins
 
   Remove a bin if it produces near zero mean over a chosen range, useful for plotting as the number of lines will be fewer.
 
@@ -84,15 +83,15 @@ The data from JSON file will be put in relevant places in the template.
 
   Configuration for the latex and odf output.
 
-- `concentration`
+.. py:attribute:: concentration
 
   The final concentration unit the data must be displayed in.
 
-- 'author'
+.. py:attribute:: author
 
   Name of author
 
-' 'title'
+.. py:attribute:: title
 
   Title of report
 
@@ -102,11 +101,11 @@ The data from JSON file will be put in relevant places in the template.
   Configuration that choose a range of time series data to analyse.
   Different experimental conditions such as particle sizes are done at different times so the data must be chosen within a time range for a particular experimental condition for analysis.
 
-- 'order'
+.. py:attribute:: order
 
   Order of experimental conditions to be analysed.
 
-- `conditions`
+.. py:attribute:: condiitons
 
   List of experimental conditions with start and end timestamp which will be used to select a range of data for analysis.
 
