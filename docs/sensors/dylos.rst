@@ -4,10 +4,9 @@ Dylos DC1100 Pro and Dylos DC1700
 Both Dylos DC1100 Pro and Dylos DC1700 measures the number of particles in two size ranges >0.5um and >2.5um.
 The small particles are detected down to 0.5 um.
 The large particles are detected down to 2.5 um.
-To get the number of particles between 0.5 and 2.5 um, subtract the value for large particles from small particles.
+They output average number of particles per 0.01 cubic foot every minute.
 
-The readings are scaled so that they represent the concentrations of particles in approx 0.01 cubic foot of sample air (counts per cubic foot).
-The readings can be multiplied by 100 to give the concentration per cubic foot.
+To get the number of particles between 0.5 and 2.5 um, subtract the value for large particles from small particles.
 
 There is a study that said the above size range are misleading, the 0.5 um bin represent 2.5 um particles and 2.5 um bin represent 10 um particles. (link)[https://aqicn.org/experiments/what-is-the-dylos-monitor-actually-measuring/]
 
