@@ -83,39 +83,42 @@ def loadSensorsData(sensors, sensorsFile, outputConc):
     # Load data for a sensor
     for sensor in sensors:
         logging.debug("Sensor: %s" % (sensor))
+        # Load config for a sensor
+        config = sensors[sensor]
+
         # Name the dataset
-        sensorName = sensors[sensor]['name']
-        # Get settings for this sensor
-        settings = sensors[sensor]['sensor']
+        sensorName = config['id']
+
         # What type of sensor it is?
-        type = settings['type']
-        # Load definition into selected sensor
-        settings.update(sensorDefinition[type])
+        type = config['type']
+
+        # Load sensor definition
+        config.update(sensorDefinition[type])
 
         # Where is the data in data/raw/?
-        sensor_dir = settings['path']
+        sensor_dir = config['path']
         data_dir = os.path.join(project_dir, "data", "raw", sensor_dir)
 
         # Fetch information about bin boundaries for this sensor
-        bins = settings['bins']
+        bins = config['bins']
 
         # Load data
         bins = loadData(data_dir, bins, sensorName)
         data = bins['data']
 
         # If the data is not in minute frequency, resample it
-        if 'resample' in settings:
-            if 'minute' == settings['resample']:
+        if 'resample' in config:
+            if 'minute' == config['resample']:
                 data = data.resample('T', label='left', closed='left').mean()
 
-        if 'realcounts' in settings:
+        if 'realcounts' in config:
             # Subtract high bins from lower
             data = realCounts(data)
 
         # How much time should the data produced by this sensor be shifted?
         # Shift datetime index of data
-        if 'timeshift' in settings:
-            timeshift = settings['timeshift']
+        if 'timeshift' in config:
+            timeshift = config['timeshift']
             sign = timeshift[0]
             period = timeshift[1:]
             t = datetime.strptime(period, "%H:%M:%S")
@@ -136,9 +139,9 @@ def loadSensorsData(sensors, sensorsFile, outputConc):
             logging.debug(debug)
 
         # Scaling and unit conversion of particle concentration
-        inputConc = ureg(settings['concentration'])
+        inputConc = ureg(config['concentration'])
         scale = float(outputConc / inputConc)
-        settings['scale factor'] = scale
+        config['scale factor'] = scale
 
         # Multiply the data with scale factor and update binDate dict
         bins['data'] = data*scale
@@ -146,37 +149,34 @@ def loadSensorsData(sensors, sensorsFile, outputConc):
         logging.debug(debug)
 
         # Calculate count rate
-        flowrate = ureg(settings['flow rate'])
+        flowrate = ureg(config['flow rate'])
         countrate = (flowrate * inputConc).to('counts per min')
-        settings['count rate'] = str('{:.03f}'.format(countrate))
+        config['count rate'] = str('{:.03f}'.format(countrate))
 
         # Update settings dict with bins
-        settings['bins'] = bins
+        config['bins'] = bins
 
         # Update sensor dict with settings
-        sensors[sensor]['sensor'] = settings
+        sensors[sensor] = config
 
     logging.debug("Rebinning calibrater")
 
     # Rebin calibrater data to calibratee bin boundaries
-    calibratee = sensors['calibratee']['sensor']['bins']
+    calibratee = sensors['calibratee']['bins']
     # Calibrater
-    calibrater = sensors['calibrater']['sensor']['bins']
+    calibrater = sensors['calibrater']['bins']
 
     # Bin boundaries of final set of bins
     finalBins = calibratee['bounds']
 
     # rebin calibrater dataset to match calibratee dataset
     rebinned = rebin(calibrater, finalBins)
-    name = "rebinned-" + sensors['calibrater']['name']
+    name = "rebinned-" + sensors['calibrater']['id']
     writeData(rebinned['data'], base_interim_data_dir, name)
-    sensors['rebinned'] = {}
-    sensors['rebinned']['name'] = name
-    sensors['rebinned']['sensor'] = {}
-    sensors['rebinned']['sensor']['bins'] = rebinned
     debug = ("Start: %s, end: %s" % (rebinned['data'].index[0],
                                      rebinned['data'].index[-1]))
     logging.debug(debug)
+    sensors['rebinned'] = {'id': name, 'bins': rebinned}
     return sensors
 
 
@@ -190,8 +190,8 @@ def experiments(expDict, sensors):
     conditions = expDict['conditions']
 
     # Concat rebinned data with calibratee data
-    calibraterData = sensors['rebinned']['sensor']['bins']['data']
-    calibrateeData = sensors['calibratee']['sensor']['bins']['data']
+    calibraterData = sensors['rebinned']['bins']['data']
+    calibrateeData = sensors['calibratee']['bins']['data']
     calibrationData = concat(calibrateeData, calibraterData)
     calibrated = calibrate(calibrationData)
 
@@ -200,7 +200,7 @@ def experiments(expDict, sensors):
     index = order
     columns = calibrated.columns
     calibration = pd.DataFrame(index=index, columns=columns)
-    caliName = sensors['calibrater']['name'] + "-" + sensors['calibratee']['name']
+    caliName = sensors['calibrater']['id'] + "-" + sensors['calibratee']['id']
 
     logging.debug("Experiment time")
     # Iterate over different experiment conditions
@@ -229,15 +229,16 @@ def experiments(expDict, sensors):
             for sensor in sensors:
                     dataDict = {}
                     sensorDict = sensors[sensor]
+                    print(sensorDict)
 
                     # Name the processed data
-                    sensorName = sensorDict['name']
+                    sensorName = sensorDict['id']
 
                     # Load data from sensor dict from time period
                     # Copy the bins data into new dict
-                    sample = copy.deepcopy(sensorDict['sensor']['bins'])
-                    fullstart = sensorDict['sensor']['bins']['data'].index[0]
-                    fullend = sensorDict['sensor']['bins']['data'].index[-1]
+                    sample = copy.deepcopy(sensorDict['bins'])
+                    fullstart = sensorDict['bins']['data'].index[0]
+                    fullend = sensorDict['bins']['data'].index[-1]
                     debug = ("Exp: %s, Sensor: %s,\n"
                              "Data start: %s and end: %s\n"
                              "Sample start: %s and end: %s\n" % (exp, sensor,
@@ -277,8 +278,8 @@ def experiments(expDict, sensors):
             logging.debug("Calibrating")
             df = calibrationData.loc[start:end]
             dict = {}
-            calibratee = sensors['calibratee']['sensor']['bins']['columns']
-            calibrater = sensors['rebinned']['sensor']['bins']['columns']
+            calibratee = sensors['calibratee']['bins']['columns']
+            calibrater = sensors['rebinned']['bins']['columns']
             columns = calibrater + calibratee
             dict['plot'] = plot(df[columns], imgs_dir, caliName)
 

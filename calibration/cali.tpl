@@ -60,10 +60,8 @@
 \newcolumntype{M}{>{\centering\arraybackslash}m{0.45\textwidth}}
 \newcolumntype{C}{>{\centering\arraybackslash}m{0.2\textwidth}}
 
-%- if output['report']
-\title{\VAR{output['report']['title']}}
-\author{\VAR{output['report']['author']}}
-%- endif
+\title{\VAR{output['title']}}
+\author{\VAR{output['author']}}
 
 \BLOCK{set calibratee = sensors['calibratee']}
 \BLOCK{set calibrater = sensors['calibrater']}
@@ -71,32 +69,32 @@
 
 \begin{document}
 \maketitle
-This summary report showing the calibration of \VAR{calibratee['sensor']['name']} by \VAR{calibrater['sensor']['name']}.
+This summary report showing the calibration of \VAR{calibratee['name']} by \VAR{calibrater['name']}.
 Each of these sensors have different properties such as air flow air and particle concentration units.
 The concentration of the particles measured by the sensors will be converted to \VAR{output['concentration']}.
 
 \begin{center}
 \begin{tabular}{m{0.3\textwidth}CC}
-& \VAR{calibrater['sensor']['name']} & \VAR{calibratee['sensor']['name']} \\
+& \VAR{calibrater['name']} & \VAR{calibratee['name']} \\
 Number of size channels & 
-\VAR{calibrater['sensor']['bins']['stringbins']|length} &
-\VAR{calibratee['sensor']['bins']['stringbins']|length} \\
+\VAR{calibrater['bins']['stringbins']|length} &
+\VAR{calibratee['bins']['stringbins']|length} \\
 Channels &
-\VAR{calibrater['sensor']['bins']['stringbins']|join} &
-\VAR{calibratee['sensor']['bins']['stringbins']|join} \\
+\VAR{calibrater['bins']['stringbins']|join} &
+\VAR{calibratee['bins']['stringbins']|join} \\
 Concentration &
-\VAR{calibrater['sensor']['concentration']} &
-\VAR{calibratee['sensor']['concentration']} \\
+\VAR{calibrater['concentration']} &
+\VAR{calibratee['concentration']} \\
 Flow rate &
-\VAR{calibrater['sensor']['flow rate']} &
-\VAR{calibratee['sensor']['flow rate']} \\
+\VAR{calibrater['flow rate']} &
+\VAR{calibratee['flow rate']} \\
 Count rate &
-\VAR{calibrater['sensor']['count rate']} &
-\VAR{calibratee['sensor']['count rate']} \\
+\VAR{calibrater['count rate']} &
+\VAR{calibratee['count rate']} \\
 
 Scale factor of input concentration to \VAR{output['concentration']} &
-\VAR{calibrater['sensor']['scale factor']} &
-\VAR{calibratee['sensor']['scale factor']} \\
+\VAR{calibrater['scale factor']} &
+\VAR{calibratee['scale factor']} \\
 \end{tabular}
 \end{center}
 
