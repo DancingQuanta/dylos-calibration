@@ -4,13 +4,14 @@
 # GLOBALS                                                                       #
 #################################################################################
 
-PROCESSED=data/processed/
+PROCESSED=data/processed
 SENSORS=src/sensors/sensors.yaml
-CALI_SETTINGS=$(shell find calibration/ -name '*.yaml')
+CALI_SETTINGS=calibration
+CALI_YAML=$(shell find $(CALI_SETTINGS)/ -name '*.yaml')
+CALI_TEX=$(patsubst %.yaml,%.tex,$(addprefix $(PROCESSED)/,$(CALI_YAML)))
 CALI_REPORT = $(patsubst %.tex,%.pdf,$(CALI_TEX))
-CALI_TEX=$(patsubst %.yaml,%.tex,$(addprefix $(PROCESSED),$(CALI_SETTINGS)))
 CALI_TEMPLATE=calibration/cali.tpl
-PROCESSED_CALI_EXP=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED),$(CALI_SETTINGS)))
+PROCESSED_CALI_EXP=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED)/,$(CALI_YAML)))
 CALI_DATA := $(shell find data/raw/ -name '*.log')
 
 #################################################################################
@@ -37,7 +38,7 @@ clean: cleancali
 	find . -name "*.pyc" -exec rm {} \;
 
 cleancali: 
-	-rm $(PROCESSED_CALI_EXP) $(CALI_REPORT) $(CALI_TEX)
+	-rm -rf $(PROCESSED)/* 
 
 recali: cleancali cali
 
@@ -49,11 +50,11 @@ lint:
 #################################################################################
 
 # Generate a report for calibration
-$(PROCESSED_CALI_EXP): $(CALI_SETTINGS) $(SENSORS) $(CALI_DATA)
-	python -m src.calibration $(CALI_SETTINGS) $(SENSORS) -o $(PROCESSED_CALI_EXP)
+$(PROCESSED_CALI_EXP): $(CALI_YAML) $(SENSORS) $(CALI_DATA)
+	python -m src.calibration $< $(SENSORS) -o $@
 
-$(CALI_TEX): $(CALI_TEMPLATE) $(PROCESSED_CALI_EXP)
-	python -m src.docs.gen $^ $@ 
+$(CALI_TEX): $(PROCESSED_CALI_EXP) $(CALI_TEMPLATE)
+	python -m src.docs.gen $(CALI_TEMPLATE) $< $@ 
 
 # generate PDF
 %.pdf: %.tex
