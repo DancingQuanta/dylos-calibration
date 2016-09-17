@@ -112,20 +112,62 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
                      "Start: %s, end: %s" % (data.index[0], data.index[-1]))
             logging.debug(debug)
 
+        # Set seconds to zero
+        data.index = data.index.values.astype('<M8[m]')
+
+        # Units of data
         # Scaling and unit conversion of particle concentration
-        inputConc = ureg(config['concentration'])
-        scale = float(outputConc / inputConc)
+        # What is the unit of recorded measurements?
+        inputUnit = ureg(config['unit'])
+        if "flowrate" in config:
+            inputFlowrate = ureg(config['flowrate'])
+
+        # Create test quantities to compare dimensionality against
+        counts_test = ureg("counts")
+        vol_test = ureg("m ** 3")
+        conc_test = counts_test / vol_test
+        time_test = ureg("s")
+        rate_test = counts_test / time_test
+        flowrate_test = vol_test * rate_test
+
+
+        # Compare dimensionality of input data and output unit
+        # If output unit is concentration
+        if outputUnit.dimensionality == conc_test.dimensionality:
+
+            # If input unit is concentration
+            if inputUnit.dimensionality == conc_test.dimensionality:
+                scale = inputUnit.to(outputUnit).magnitude
+                # scale = 1/float(outputUnit / inputUnit)
+                if 'concentration' not in config:
+                    config['concentration'] = str('{:.03f~}'.format(inputUnit))
+                # Calculate count rate if not exists
+                if 'count rate' not in config:
+                    countrate = (inputFlowrate * inputUnit).to('counts per second')
+                    config['count rate'] = str('{:.03f~}'.format(countrate))
+
+            # If input unit is count rate
+            elif inputUnit.dimensionality == rate_test.dimensionality:
+                conc = inputUnit / inputFlowrate
+                scale = float(outputUnit / conc)
+                if 'count rate' not in config:
+                    config['count rate'] = str('{:.03f}'.format(inputUnit))
+                if 'concentration' not in config:
+                    config['concentration'] = str('{:.03f}'.format(conc))
+
+            else:
+                msg = "The input unit is incorrect or not yet implementated!"
+                raise ValueError(msg)
+        else:
+            msg = "The output unit is incorrect or not yet implementated!"
+            raise ValueError(msg)
+
         config['scale factor'] = scale
 
         # Multiply the data with scale factor and update binDate dict
         bins['data'] = data*scale
         debug = "The scaling factor is %s" % (scale)
         logging.debug(debug)
-
-        # Calculate count rate
-        flowrate = ureg(config['flow rate'])
-        countrate = (flowrate * inputConc).to('counts per min')
-        config['count rate'] = str('{:.03f}'.format(countrate))
 
         # Update settings dict with bins
         config['bins'] = bins
