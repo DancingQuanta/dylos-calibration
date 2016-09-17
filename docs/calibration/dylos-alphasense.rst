@@ -49,7 +49,7 @@ Timeline
 08/09/16
 ~~~~~~~~
  
-Pi time is 8:59 to current time 10:22 
+Pi time is 8:59 to current time 10:22 - 1 hour and 23 mins
 
 09:00 Added more water and 2um particles
 10:10 Found water dried up, when the initial level is close to the edge of cone.
@@ -64,10 +64,30 @@ Pi time is 8:59 to current time 10:22
 09/09/16
 ~~~~~~~~
 
-Pi time is 6:57 to current time 8:20
+Pi time is 6:57 to current time 8:20 - 1 hour and 23 mins
 
 08:15 Started pump with pure water
 09:00 Introduced 2um particles
 10:30 Introduced 0.4um particles
 14:00 Introduced 0.8um particles
 
+15/09/16
+--------
+
+09:40 Started pumped with pure water Pi time 8:17
+10:40 Introduced 0.8um
+12:40 Introduced 0.4um
+13:40 Pure water
+14:40 Introduced 0.8um
+
+Lost the data...
+
+16/09/16
+--------
+ 
+Pi 17:06 to correct time 18:30
+
+14:30 Started Pump
+14:40 Introduced 0.8um particles
+15:45 Introduced 0.4um particles
+17:05 Introduced 0.3um particles
