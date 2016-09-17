@@ -14,6 +14,13 @@ CALI_TEMPLATE=calibration/cali.tpl
 PROCESSED_CALI_EXP=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED)/,$(CALI_YAML)))
 CALI_DATA := $(shell find data/raw/ -name '*.log')
 
+DYLOS_SETTINGS=dylos
+DYLOS_YAML=$(shell find $(DYLOS_SETTINGS)/ -name '*.yaml')
+DYLOS_TEX=$(patsubst %.yaml,%.tex,$(addprefix $(PROCESSED)/,$(DYLOS_YAML)))
+DYLOS_REPORT = $(patsubst %.tex,%.pdf,$(DYLOS_TEX))
+DYLOS_TEMPLATE=$(DYLOS_SETTINGS)/dylos.tpl
+PROCESSED_DYLOS=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED)/,$(DYLOS_YAML)))
+
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
@@ -27,8 +34,7 @@ docs: requirements
 data: 
 	python -m src.data.inspect_data
 
-dylos: 
-	python -m src.visualization.dylos
+dylos: $(PROCESSED_DYLOS) $(DYLOS_REPORT)
 
 devcali: $(PROCESSED_CALI_EXP)
 
@@ -38,7 +44,7 @@ clean: cleancali
 	find . -name "*.pyc" -exec rm {} \;
 
 cleancali: 
-	-rm -rf $(PROCESSED)/* 
+	-rm -rf $(PROCESSED_CALI_EXP) $(CALI_TEX) $(CALI_REPORT)
 
 recali: cleancali cali
 
@@ -50,11 +56,18 @@ lint:
 #################################################################################
 
 # Generate a report for calibration
-$(PROCESSED_CALI_EXP): $(CALI_YAML) $(SENSORS) $(CALI_DATA)
+$(PROCESSED_CALI_EXP): $(CALI_YAML) $(SENSORS)
 	python -m src.calibration $< $(SENSORS) -o $@
 
 $(CALI_TEX): $(PROCESSED_CALI_EXP) $(CALI_TEMPLATE)
 	python -m src.docs.gen $(CALI_TEMPLATE) $< $@ 
+
+# Dylos report
+$(PROCESSED_DYLOS): $(DYLOS_YAML)
+	python -m src.dylos $< -o $@
+
+$(DYLOS_TEX): $(PROCESSED_DYLOS) $(DYLOS_TEMPLATE)
+	python -m src.docs.gen $(DYLOS_TEMPLATE) $< $@ 
 
 # generate PDF
 %.pdf: %.tex
