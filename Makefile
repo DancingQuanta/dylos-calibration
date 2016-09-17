@@ -12,7 +12,6 @@ CALI_TEX=$(patsubst %.yaml,%.tex,$(addprefix $(PROCESSED)/,$(CALI_YAML)))
 CALI_REPORT = $(patsubst %.tex,%.pdf,$(CALI_TEX))
 CALI_TEMPLATE=calibration/cali.tpl
 PROCESSED_CALI_EXP=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED)/,$(CALI_YAML)))
-CALI_DATA := $(shell find data/raw/ -name '*.log')
 
 DYLOS_SETTINGS=dylos
 DYLOS_YAML=$(shell find $(DYLOS_SETTINGS)/ -name '*.yaml')
@@ -20,6 +19,8 @@ DYLOS_TEX=$(patsubst %.yaml,%.tex,$(addprefix $(PROCESSED)/,$(DYLOS_YAML)))
 DYLOS_REPORT = $(patsubst %.tex,%.pdf,$(DYLOS_TEX))
 DYLOS_TEMPLATE=$(DYLOS_SETTINGS)/dylos.tpl
 PROCESSED_DYLOS=$(patsubst %.yaml,%.json,$(addprefix $(PROCESSED)/,$(DYLOS_YAML)))
+
+DATA := $(shell find data/raw/ -name '*.log')
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -56,14 +57,14 @@ lint:
 #################################################################################
 
 # Generate a report for calibration
-$(PROCESSED_CALI_EXP): $(CALI_YAML) $(SENSORS)
+$(PROCESSED_CALI_EXP): $(CALI_YAML) $(SENSORS) $(DATA)
 	python -m src.calibration $< $(SENSORS) -o $@
 
 $(CALI_TEX): $(PROCESSED_CALI_EXP) $(CALI_TEMPLATE)
 	python -m src.docs.gen $(CALI_TEMPLATE) $< $@ 
 
 # Dylos report
-$(PROCESSED_DYLOS): $(DYLOS_YAML)
+$(PROCESSED_DYLOS): $(DYLOS_YAML) $(DATA)
 	python -m src.dylos $< -o $@
 
 $(DYLOS_TEX): $(PROCESSED_DYLOS) $(DYLOS_TEMPLATE)
