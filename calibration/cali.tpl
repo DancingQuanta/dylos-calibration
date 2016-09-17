@@ -71,7 +71,7 @@
 \maketitle
 This summary report showing the calibration of \VAR{calibratee['name']} by \VAR{calibrater['name']}.
 Each of these sensors have different properties such as air flow air and particle concentration units.
-The concentration of the particles measured by the sensors will be converted to \VAR{output['concentration']}.
+All data produced will be converted from their respective units to \VAR{output['unit']}.
 
 \begin{center}
 \begin{tabular}{m{0.3\textwidth}CC}
@@ -82,17 +82,20 @@ Number of size channels &
 Channels &
 \VAR{calibrater['bins']['stringbins']|join} &
 \VAR{calibratee['bins']['stringbins']|join} \\
+Input unit & 
+\VAR{calibrater['unit']} &
+\VAR{calibratee['unit']} \\
 Concentration &
 \VAR{calibrater['concentration']} &
 \VAR{calibratee['concentration']} \\
 Flow rate &
-\VAR{calibrater['flow rate']} &
-\VAR{calibratee['flow rate']} \\
+\VAR{calibrater['flowrate']} &
+\VAR{calibratee['flowrate']} \\
 Count rate &
 \VAR{calibrater['count rate']} &
 \VAR{calibratee['count rate']} \\
 
-Scale factor of input concentration to \VAR{output['concentration']} &
+Scale factor of input unit to \VAR{output['unit']} &
 \VAR{calibrater['scale factor']} &
 \VAR{calibratee['scale factor']} \\
 \end{tabular}
@@ -100,40 +103,41 @@ Scale factor of input concentration to \VAR{output['concentration']} &
 
 \clearpage
 \BLOCK{for item in exp['order']}
+\BLOCK{set condition = exp['conditions'][item]['results']}
 
 \section{\VAR{item}}
 \subsection{\VAR{calibrater['name']}}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['calibrater']['plot']}} &
-\input{\VAR{exp['conditions'][item]['data']['calibration']['plot']}} \\
+\input{\VAR{condition['calibrater']['plot']}} &
+\input{\VAR{condition['calibration']['plot']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['hist']}} &
-\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{condition['calibrater']['histogram']['histplot']['hist']}} &
+\input{\VAR{condition['calibrater']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histdata']}} &
-\input{\VAR{exp['conditions'][item]['data']['calibrater']['histogram']['histstats']}} \\
+\input{\VAR{condition['calibrater']['histogram']['histdata']}} &
+\input{\VAR{condition['calibrater']['histogram']['histstats']}} \\
 \end{tabular}
 
 \subsection{\VAR{calibratee['name']}}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['hist']}} &
-\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{condition['calibratee']['histogram']['histplot']['hist']}} &
+\input{\VAR{condition['calibratee']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histdata']}} &
-\input{\VAR{exp['conditions'][item]['data']['calibratee']['histogram']['histstats']}} \\
+\input{\VAR{condition['calibratee']['histogram']['histdata']}} &
+\input{\VAR{condition['calibratee']['histogram']['histstats']}} \\
 \end{tabular}
 
 \subsection{\VAR{rebinned['name']}}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['hist']}} &
-\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histplot']['histlog']}} \\
+\input{\VAR{condition['rebinned']['histogram']['histplot']['hist']}} &
+\input{\VAR{condition['rebinned']['histogram']['histplot']['histlog']}} \\
 \end{tabular}
 \begin{tabular}{MM}
-\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histdata']}} &
-\input{\VAR{exp['conditions'][item]['data']['rebinned']['histogram']['histstats']}} \\
+\input{\VAR{condition['rebinned']['histogram']['histdata']}} &
+\input{\VAR{condition['rebinned']['histogram']['histstats']}} \\
 \end{tabular}
 \clearpage
 \BLOCK{endfor}
