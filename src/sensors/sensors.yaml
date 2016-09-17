@@ -1,17 +1,17 @@
 dylos:
   name: 'Dylos DC1700'
   bins: [0.5, 2.5, 10]
-  concentration: '100 counts per cubic foot'
-  flow rate: '0.036 cubic foot per minute'
+  unit: 'counts / (0.01 cubic foot)'
+  flowrate: '0.036 cubic foot per minute'
   realcounts:
 grimm:
   name: 'Grimm 1.108'
   bins: ['',0.3,0.4,0.5,0.65,0.8,1,1.6,2,3,4,5,7.5,10,15,20,30]
-  concentration: '0.01 counts per ml'
-  flow rate: '1.2 l/min'
+  unit: 'counts / (100 ml)'
+  flowrate: '1.2 l/min'
 opcn2:
   name: 'Alphasense OPC-N2'
   bins: [0.38, 0.54, 0.78, 1.05, 1.34, 1.59, 2.07, 3.0, 4.0, 5.0, 6.5, 8.0, 10.0, 12.0, 14.0, 16.0, 17.5]
-  concentration: ''
-  flow rate: '220 ml/min'
+  unit: "count per cubic cm"
+  flowrate: '220 ml/min'
   sampleparticlerate: '10000'
