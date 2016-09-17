@@ -131,7 +131,6 @@ def geometricStd(data, bounds, gmd):
 
 
 def plot(data, path, name):
-    plt.clf()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     data.plot(ax=ax)
@@ -150,8 +149,31 @@ def plot(data, path, name):
 
     plt.tight_layout()
     path = saveplot(path, name, "plot", fig, **kwargs)
-    plt.clf()
-    # plt.close()
+    plt.close()
+    return path.replace("\\\\", "/")
+
+
+def twoplot(df, df1, path, name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    df.plot(ax=ax)
+    df1.plot(ax=ax)
+    plt.ylabel('Particle count')
+    plt.xlabel('Time')
+    # custom_tick_labels = data.index.map(lambda t: t.strftime('%H'))
+    # ax.set_xticklabels(custom_tick_labels)
+
+    lines, labels = ax.get_legend_handles_labels()
+    ax.legend(lines, labels, loc='upper center', mode='expand')
+    art = []
+    lgd = ax.legend(lines, labels, loc=9, bbox_to_anchor=(0.5, -0.2), ncol=2)
+    art.append(lgd)
+    kwargs = {"additional_artists": art,
+              "bbox_inches": "tight"}
+
+    # plt.tight_layout()
+    path = saveplot(path, name, "twoplot", fig, **kwargs)
+    plt.close()
     return path.replace("\\\\", "/")
 
 
@@ -259,59 +281,60 @@ def histogram(data, plotspath, statspath, name):
     w = np.array(x2)-np.array(x1)  # variable width
     y = df1['Density'].tolist()
 
-    plt.clf()
+    # plt.clf()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.bar(x1, y, width=w)
 
-    # find minimum and maximum of xticks, so we know
-    # where we should compute theoretical distribution
-    xt = plt.xticks()[0]
-    xmin, xmax = min(xt), max(xt)
-    lnspc = np.linspace(xmin, xmax, len(y))
-    pdf_g = stats.norm.pdf(lnspc, mean, std)
-    ax.plot(lnspc, pdf_g, label="Norm")
+    # # find minimum and maximum of xticks, so we know
+    # # where we should compute theoretical distribution
+    # xt = plt.xticks()[0]
+    # xmin, xmax = min(xt), max(xt)
+    # lnspc = np.linspace(xmin, xmax, len(y))
+    # pdf_g = stats.norm.pdf(lnspc, mean, std)
+    # ax.plot(lnspc, pdf_g, label="Norm")
 
     plt.ylabel(r'Frequency per $\mu$')
     plt.xlabel(r'\textbf{Diameter} / $\mu$')
     path1 = saveplot(plotspath, name, "hist", fig)
     dataDict['histplot']["hist"] = path1
+    plt.close()
 
     # Cumulative distribution
     y = df1['Cum Counts'].tolist()
 
-    plt.clf()
     fig = plt.figure()
     plt.plot(x1, y)
     plt.ylabel(r'Cumulative frequency')
     plt.xlabel(r'\textbf{Diameter} / $\mu$')
     path1 = saveplot(plotspath, name, "cumFreq", fig)
     dataDict['histplot']["cumFreq"] = path1
+    plt.close()
 
     # x1 = df1["loglower"].tolist() # left edge
     # x2 = df1["logupper"].tolist() # right edge
     # w = np.array(x2)-np.array(x1) # variable width
     y = df1["dN/logD"].tolist()
-    plt.clf()
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.bar(x1, y, width=w)
     ax.set_xscale('log')
 
-    # find minimum and maximum of xticks, so we know
-    # where we should compute theoretical distribution
-    xt = plt.xticks()[0]
-    xmin, xmax = min(xt), max(xt)
-    lnspc = np.linspace(xmin, xmax, len(y))
-    pdf_g = stats.norm.pdf(lnspc, gm, gstd)
-    ax.plot(lnspc, pdf_g, label="Norm")
+    # # find minimum and maximum of xticks, so we know
+    # # where we should compute theoretical distribution
+    # xt = plt.xticks()[0]
+    # xmin, xmax = min(xt), max(xt)
+    # lnspc = np.linspace(xmin, xmax, len(y))
+    # pdf_g = stats.norm.pdf(lnspc, gm, gstd)
+    # ax.plot(lnspc, pdf_g, label="Norm")
 
     plt.ylabel(r'Frequency per $\log \mu$')
     plt.xlabel(r'$\log \mathbf{Diameter}$ / $\mu$')
     path1 = saveplot(plotspath, name, "histlog", fig)
     dataDict['histplot']["histlog"] = path1
-    plt.clf()
-
+    # plt.clf()
+    plt.close()
     return dataDict
 
 
