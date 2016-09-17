@@ -65,7 +65,7 @@ $(CALI_TEX): $(PROCESSED_CALI_EXP) $(CALI_TEMPLATE)
 
 # Dylos report
 $(PROCESSED_DYLOS): $(DYLOS_YAML) $(DATA)
-	python -m src.dylos $< -o $@
+	python -m src.sensors.dylos-plots $< -o $@
 
 $(DYLOS_TEX): $(PROCESSED_DYLOS) $(DYLOS_TEMPLATE)
 	python -m src.docs.gen $(DYLOS_TEMPLATE) $< $@ 
