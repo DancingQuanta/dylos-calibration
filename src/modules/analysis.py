@@ -60,6 +60,13 @@ def save_latex(df, path, name, kind, **kwargs):
     return path.replace("\\\\", "/")
 
 
+def index_mins(df):
+    period = df.index - df.index[0]
+    mins = period.total_seconds() / 60
+    df.index = mins
+    return df
+
+
 def nmoment(x, counts, c, n):
     return np.sum(((x-c)**n)*counts) / np.sum(counts)
 
@@ -131,13 +138,12 @@ def geometricStd(data, bounds, gmd):
 
 
 def plot(data, path, name):
+    data = index_mins(data)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     data.plot(ax=ax)
     plt.ylabel('Particle count')
-    plt.xlabel('Time')
-    # custom_tick_labels = data.index.map(lambda t: t.strftime('%H'))
-    # ax.set_xticklabels(custom_tick_labels)
+    plt.xlabel('Time/min')
 
     lines, labels = ax.get_legend_handles_labels()
     ax.legend(lines, labels, loc='upper center', mode='expand')
@@ -147,21 +153,20 @@ def plot(data, path, name):
     kwargs = {"additional_artists": art,
               "bbox_inches": "tight"}
 
-    plt.tight_layout()
     path = saveplot(path, name, "plot", fig, **kwargs)
     plt.close()
     return path.replace("\\\\", "/")
 
 
 def twoplot(df, df1, path, name):
+    df = index_mins(df)
+    df1 = index_mins(df1)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     df.plot(ax=ax)
     df1.plot(ax=ax)
     plt.ylabel('Particle count')
-    plt.xlabel('Time')
-    # custom_tick_labels = data.index.map(lambda t: t.strftime('%H'))
-    # ax.set_xticklabels(custom_tick_labels)
+    plt.xlabel('Time/min')
 
     lines, labels = ax.get_legend_handles_labels()
     ax.legend(lines, labels, loc='upper center', mode='expand')
@@ -171,7 +176,6 @@ def twoplot(df, df1, path, name):
     kwargs = {"additional_artists": art,
               "bbox_inches": "tight"}
 
-    # plt.tight_layout()
     path = saveplot(path, name, "twoplot", fig, **kwargs)
     plt.close()
     return path.replace("\\\\", "/")
