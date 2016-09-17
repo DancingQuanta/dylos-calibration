@@ -45,34 +45,8 @@ params = {                      # setup matplotlib to use latex for output
     }
 matplotlib.rcParams.update(params)
 
-# Create some directories if they do not exist
 
-# Base project directory
-project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
-project_dir = os.path.abspath(project_dir)
-
-# Base imgs directory
-base_imgs_dir = os.path.join(project_dir, "imgs", "calibration")
-if not os.path.isdir(base_imgs_dir):
-    os.makedirs(base_imgs_dir)
-
-# Base interim data directory
-base_interim_data_dir = os.path.join(project_dir, "data", "interim",
-                                     "calibration")
-if not os.path.isdir(base_interim_data_dir):
-    os.makedirs(base_interim_data_dir)
-
-# Base processed data directory
-base_processed_data_dir = os.path.join(project_dir, "data", "processed",
-                                     "calibration")
-if not os.path.isdir(base_processed_data_dir):
-    os.makedirs(base_processed_data_dir)
-
-# Initialise pint's UnitRegistry
-ureg = UnitRegistry()
-
-
-def loadSensorsData(sensors, sensorsFile, outputConc):
+def loadSensorsData(sensors, sensorsFile, outputUnit):
     # Load sensors definitions
     with open(sensorsFile) as handle:
         sensorDefinition = yaml.load(handle)
@@ -315,6 +289,33 @@ if __name__ == '__main__':
     settingsFile = options.settings
     sensorsFile = options.sensors
     outputFile = options.output
+
+    name = os.path.basename(settingsFile)
+    name = os.path.splitext(name)[0]
+
+    # Base project directory
+    project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
+    project_dir = os.path.abspath(project_dir)
+
+    # Create some directories if they do not exist
+
+    # Base imgs directory
+    base_imgs_dir = os.path.join(project_dir, "imgs", name)
+    if not os.path.isdir(base_imgs_dir):
+        os.makedirs(base_imgs_dir)
+
+    # Base interim data directory
+    base_interim_data_dir = os.path.join(project_dir, "data", "interim", name)
+    if not os.path.isdir(base_interim_data_dir):
+        os.makedirs(base_interim_data_dir)
+
+    # Base processed data directory
+    base_processed_data_dir = os.path.join(project_dir, "data", "processed", name)
+    if not os.path.isdir(base_processed_data_dir):
+        os.makedirs(base_processed_data_dir)
+
+    # Initialise pint's UnitRegistry
+    ureg = UnitRegistry()
 
     # Load settings yaml file
     with open(settingsFile) as handle:
