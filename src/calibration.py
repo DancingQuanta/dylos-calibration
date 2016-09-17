@@ -130,6 +130,9 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
         # Update settings dict with bins
         config['bins'] = bins
 
+        # Write the results to disk
+        writeData(bins['data'], base_interim_data_dir, sensorName)
+
         # Update sensor dict with settings
         sensors[sensor] = config
 
@@ -164,17 +167,18 @@ def experiments(expDict, sensors):
     conditions = expDict['conditions']
 
     # Concat rebinned data with calibratee data
+    caliName = sensors['calibrater']['id'] + "-" + sensors['calibratee']['id']
     calibraterData = sensors['rebinned']['bins']['data']
     calibrateeData = sensors['calibratee']['bins']['data']
     calibrationData = concat(calibrateeData, calibraterData)
     calibrated = calibrate(calibrationData)
+    writeData(calibrated, base_interim_data_dir, caliName)
 
     # Initialise a DataFrame to store mean particle counts of each experiment for
     # a calibratee and rebinned calibrater
     index = order
     columns = calibrated.columns
     calibration = pd.DataFrame(index=index, columns=columns)
-    caliName = sensors['calibrater']['id'] + "-" + sensors['calibratee']['id']
 
     logging.debug("Experiment time")
     # Iterate over different experiment conditions
@@ -192,18 +196,16 @@ def experiments(expDict, sensors):
             os.makedirs(processed_data_dir)
 
         # Load start and end datetime for time series data
-        time = condition['time']
-        start = time['start']
-        end = time['end']
+        start = condition['start']
+        end = condition['end']
 
-        condition['data'] = {}
+        condition['results'] = {}
 
         # Iterate over different sensors
         try:
             for sensor in sensors:
                     dataDict = {}
                     sensorDict = sensors[sensor]
-                    print(sensorDict)
 
                     # Name the processed data
                     sensorName = sensorDict['id']
@@ -246,7 +248,7 @@ def experiments(expDict, sensors):
 
                     # Add data collected so far for this experiment and sensor to main
                     # dictionary
-                    condition['data'][sensor] = dataDict
+                    condition['results'][sensor] = dataDict
 
             conditions[exp] = condition
             logging.debug("Calibrating")
@@ -260,7 +262,7 @@ def experiments(expDict, sensors):
             # Calculate calibration factors
             mean = calibrated.loc[start:end].mean()
             calibration.loc[exp] = mean
-            condition['data']['calibration'] = dict
+            condition['results']['calibration'] = dict
             del sample
 
         except Exception as e:
@@ -322,7 +324,7 @@ if __name__ == '__main__':
         settings = yaml.load(handle)
 
     # Final particle concentration
-    outputConc = ureg(settings['output']['concentration'])
+    outputUnit = ureg(settings['output']['unit'])
 
     # Sensors
     sensorsDict = settings['sensors']
@@ -331,7 +333,7 @@ if __name__ == '__main__':
     expDict = settings['exp']
 
     # Load information about sensors and load data for each sensor
-    sensorsDict = loadSensorsData(sensorsDict, sensorsFile, outputConc)
+    sensorsDict = loadSensorsData(sensorsDict, sensorsFile, outputUnit)
 
     # Perform analysis on each experiment
     expDict = experiments(expDict, sensorsDict)
