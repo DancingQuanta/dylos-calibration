@@ -251,14 +251,17 @@ def concat(df1, df2):
     index is used.
     """
     if len(df1) == len(df2):
+        print("Same")
         df2.index = df1.index
         df = df1.join(df2)
     elif len(df1) > len(df2):
+        print("df1 big")
         start = df2.index[0]
         end = df2.index[-1]
         df3 = df1.loc[start:end]
         df = df3.join(df2)
     elif len(df1) < len(df2):
+        print("df2 big")
         start = df1.index[0]
         end = df1.index[-1]
         df3 = df2.loc[start:end]
