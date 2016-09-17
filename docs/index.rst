@@ -23,6 +23,7 @@ Contents:
    particles
    sensors/index
    electronics/index
+   data-preparation
    analysis
    calibration/index
 
