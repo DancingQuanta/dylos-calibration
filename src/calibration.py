@@ -29,6 +29,7 @@ params = {
     }
 matplotlib.rcParams.update(params)
 
+
 def loadSensorsData(sensors, sensorsFile, outputUnit):
     # Load sensors definitions
     with open(sensorsFile) as handle:
@@ -191,22 +192,16 @@ def experiments(expDict, sensors):
     order = expDict['order']
     conditions = expDict['conditions']
 
-    # Concat rebinned data with calibratee data
+    # Concat rebinned data with calibratee data and print to file
     caliName = sensors['calibrater']['id'] + "-" + sensors['calibratee']['id']
     calibraterData = sensors['rebinned']['bins']['data']
     calibrateeData = sensors['calibratee']['bins']['data']
     calibrationData = concat(calibrateeData, calibraterData)
-    calibrated = calibrate(calibrationData)
-    writeData(calibrated, base_interim_data_dir, caliName)
-
-    # Initialise a DataFrame to store mean particle counts of each experiment for
-    # a calibratee and rebinned calibrater
-    index = order
-    columns = calibrated.columns
-    calibration = pd.DataFrame(index=index, columns=columns)
+    writeData(calibrationData, base_interim_data_dir, caliName)
 
     logging.debug("Experiment time")
     # Iterate over different experiment conditions
+    reg_dict = {}
     for exp in order:
         condition = conditions[exp]
 
@@ -227,78 +222,77 @@ def experiments(expDict, sensors):
         condition['results'] = {}
 
         # Iterate over different sensors
-        try:
-            for sensor in sensors:
-                    dataDict = {}
-                    sensorDict = sensors[sensor]
+        for sensor in sensors:
+            dataDict = {}
+            sensorDict = sensors[sensor]
 
-                    # Name the processed data
-                    sensorName = sensorDict['id']
+            # Name the processed data
+            sensorName = sensorDict['id']
 
-                    # Load data from sensor dict from time period
-                    # Copy the bins data into new dict
-                    sample = copy.deepcopy(sensorDict['bins'])
-                    fullstart = sensorDict['bins']['data'].index[0]
-                    fullend = sensorDict['bins']['data'].index[-1]
-                    debug = ("Exp: %s, Sensor: %s,\n"
-                             "Data start: %s and end: %s\n"
-                             "Sample start: %s and end: %s\n" % (exp, sensor,
-                                                               fullstart,
-                                                               fullend, start, end))
-                    logging.debug(debug)
-                    sample['data'] = sample['data'].loc[start:end]
+            # Load data from sensor dict from time period
+            # Copy the bins data into new dict
+            sample = copy.deepcopy(sensorDict['bins'])
+            fullstart = sensorDict['bins']['data'].index[0]
+            fullend = sensorDict['bins']['data'].index[-1]
+            debug = ("Exp: %s, Sensor: %s,\n"
+                     "Data start: %s and end: %s\n"
+                     "Sample start: %s and end: %s\n" % (exp, sensor,
+                                                       fullstart,
+                                                       fullend, start, end))
+            logging.debug(debug)
+            sample['data'] = sample['data'].loc[start:end]
 
-                    realstart = sample['data'].index[0]
-                    realend = sample['data'].index[-1]
-                    debug = ("Sample start: %s and end: %s\n" % (realstart, realend))
-                    logging.debug(debug)
+            realstart = sample['data'].index[0]
+            realend = sample['data'].index[-1]
+            debug = ("Sample start: %s and end: %s\n" % (realstart, realend))
+            logging.debug(debug)
 
-                    # Does data from this sensor need processing?
-                    if 'process' in sensorDict:
-                        # Check if any bins have zero counts and drop them
-                        if 'prunebins' in sensorDict['process']:
-                            # Prune bins from data that have zero counts
-                            sample = pruneBins(sample)
+            # Does data from this sensor need processing?
+            if 'process' in sensorDict:
+                # Check if any bins have zero counts and drop them
+                if 'prunebins' in sensorDict['process']:
+                    # Prune bins from data that have zero counts
+                    sample = pruneBins(sample)
 
-                    # Write sample to file
-                    writeData(sample['data'], interim_data_dir, sensorName)
+            # Write sample to file
+            writeData(sample['data'], interim_data_dir, sensorName)
 
-                    # Plot selected time series data
-                    plotPath = plot(sample['data'], imgs_dir, sensorName)
-                    dataDict["plot"] = plotPath.replace("\\\\", "/")
+            # Plot selected time series data
+            plotPath = plot(sample['data'], imgs_dir, sensorName)
+            dataDict["plot"] = plotPath.replace("\\\\", "/")
 
-                    # Plot histogram and get statistics
-                    histDict = histogram(sample, imgs_dir, processed_data_dir, sensorName)
-                    dataDict["histogram"] = histDict
+            # Plot histogram and get statistics
+            histDict = histogram(sample, imgs_dir, processed_data_dir, sensorName)
+            dataDict["histogram"] = histDict
 
-                    # Add data collected so far for this experiment and sensor to main
-                    # dictionary
-                    condition['results'][sensor] = dataDict
+            # Add data collected so far for this experiment and sensor to main
+            # dictionary
+            condition['results'][sensor] = dataDict
 
-            conditions[exp] = condition
-            logging.debug("Calibrating")
-            df = calibrationData.loc[start:end]
-            dict = {}
-            calibratee = sensors['calibratee']['bins']['columns']
-            calibrater = sensors['rebinned']['bins']['columns']
-            columns = calibrater + calibratee
-            dict['plot'] = plot(df[columns], imgs_dir, caliName)
+        conditions[exp] = condition
 
-            # Calculate calibration factors
-            mean = calibrated.loc[start:end].mean()
-            calibration.loc[exp] = mean
-            condition['results']['calibration'] = dict
-            del sample
+        # Calibration
+        logging.debug("Calibrating")
+        dict = {}
+        df = calibrationData.loc[start:end]
 
-        except Exception as e:
-            del conditions[exp]
-            order.remove(exp)
-            logging.exception(e)
-            logging.debug(exp)
-            continue
+        # Plot both rebinned calibrater and calibratee
+        dict['plot'] = plot(df, imgs_dir, caliName)
+
+        # Take a mean and ste
+        paths, stats = cali_regression(df,
+                                       imgs_dir,
+                                       processed_data_dir,
+                                       name)
+
+        reg_dict[exp] = stats
+        dict['regression'] = paths
+
+        condition['results']['calibration'] = dict
+        del sample
 
     # Add data collected for all experiments and write to file
-    latex = save_latex(calibration, base_processed_data_dir, caliName, "calibration")
+    latex = regression_table(reg_dict, order, base_processed_data_dir, caliName)
     expDict['calibration'] = latex
     expDict['conditions'] = conditions
     return expDict
