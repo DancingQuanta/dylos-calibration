@@ -8,8 +8,10 @@ The data files should have the format YYYY-MM-DD-HH-dev where dev is nickname of
 Dylos DC1100 and Dylos DC1700
 -----------------------------
 
-If you are running an experiment where you are using Dylos DC1100 and Dylos DC1700, then the data files may have data from both of those Dylos sensors rather than separate due to the port changing.
-So those datafiles needs to be separated out properly.
+If you are running an experiment where you are using Dylos DC1100 and Dylos DC1700.
+The device names assigned to each sensor depends on which sensor is plugged in first.
+At any time, the device names may change, due to unplugging and replugging or OS misbehaving, the data from both sensor may get mixed up in a data file.
+So those data files needs to be separated out properly.
 
 1. It was known that Dylos DC1100 Pro have a sampling period of 59 seconds while Dylos DC1700 have a sampling period of 60 seconds. So to separate them out I have to look at the timestamp and see if the timestamps change by 60 or 59 seconds.
 2. Concatenate the data files in one file for each sensor, for example, I simply ran a linux command::
@@ -36,8 +38,8 @@ So those datafiles needs to be separated out properly.
     2016-09-08 09:20:05.616240,4504,1891 <---------- The frequency of the timestamp changed here
     2016-09-08 09:23:58.366434,4692,1529 <---------- 
     2016-09-08 09:24:54.972582,4644,1534 | Notice there is 3 mins difference between this timestep and the previous
-    2016-09-08 09:25:55.066175,4611,1511 | This is probably where the sensors may got unplugged
-    2016-09-08 09:26:52.810112,4655,1502 | or Pi decides to be lazy.
+    2016-09-08 09:25:55.066175,4611,1511 | This is probably where the sensors may got unplugged, pi lazy or
+    2016-09-08 09:26:52.810112,4655,1502 | logger restarted.
     2016-09-08 09:27:56.999825,4648,1507 | 
     2016-09-08 09:28:50.999911,4651,1474 |
     2016-09-08 09:29:49.652145,4532,1491 | The data here comes from DC1100
