@@ -139,10 +139,14 @@ Scale factor of input unit to \VAR{output['unit']} &
 \input{\VAR{condition['rebinned']['histogram']['histdata']}} &
 \input{\VAR{condition['rebinned']['histogram']['histstats']}} \\
 \end{tabular}
+
+\subsection{Calibration curve}
+\input{\VAR{condition['calibration']['regression']['scatter']}}
+
 \clearpage
 \BLOCK{endfor}
 
-\section{Calibration}
+\section{Calibration parameters}
 
 \input{\VAR{exp['calibration']}}
 
