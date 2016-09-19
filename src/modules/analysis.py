@@ -11,7 +11,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy import stats
+from scipy import polyval
+import statsmodels.api as sm
 
 # matplotlib settings
 params = {                      # setup matplotlib to use latex for output
@@ -461,13 +462,12 @@ def compare(data, path):
     # scatter_plot(data, path)
 
 
-def calibrate(df):
-    """Calibrate a dataset by other dataset.
+def calibrate(df, plot_path, data_path, name):
+    """Calibrate a dataset by other dataset with linear regression.
     Each dataset is a time series histogram with defined bin boundaries.
     Both datasets must share same bin boundaries.
-    The value of a bin of a dataset is divided by a value of same bin of
-    different dataset to find a multiplicative calibration factor between two
-    dataset for that bin.
+
+    A regression analysis is computed on each bin between two datasets.
 
     Args:
         df: Pandas.DataFrame
@@ -475,23 +475,144 @@ def calibrate(df):
             bin. For two bins dataset, the dataframe will have four columns, of
             which two belonged to one dataset and other two belonged to another
             dataset.
-            The leftmost dataset will be divided by the rightmost dataset.
+            The columns' name must be in the format 'name-bin' where name is a
+            string and bin is float.
+        plot_path: str
+            path where saved plots goes to lie.
+        data_path: str
+            path where saved stats results goes to lie.
+        name: str
+            labelling of outputs such as plots.
     Returns:
-        df: Pandas.DataFrame
-            Output DataFrame is a superset of input dataframe with additional
-            columns which are calibration factors for each bin over time.
+        paths: dict
+            dict of paths to plots and stats
+        reg_dict: dict
+            dict of stats
     """
+    # Create dictionaries
+    paths = {}
+    # paths['scatter'] = {}
+    # paths['regression'] = {}
+    reg_dict = {}
+
+    # Set up path for stats
+    filename = name + "-stats.csv"
+    data_path = os.path.join(data_path, filename)
+    paths['regression'] = data_path
+
+    # Get details of dataframe
     columns = df.columns
+    # How many bins are there for two sensors?
+    no = int(len(columns) / 2)
+
+    # Init figure
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    fig, axarr = plt.subplots(1, no)
+    axes = fig.axes
+    # Change figure size
+    fig_width, fig_height = fig.get_size_inches()
+    fig.set_size_inches(fig_width*no, fig_height)
+
+    # loop over sensors and bins
+    k = 0
     for i, a in enumerate(columns):
         for j, b in enumerate(columns[i:]):
+            # Ensure different sensors but same bins are used
             sensor1, bin1 = a.split('-')
             sensor2, bin2 = b.split('-')
             if bin1 == bin2 and sensor1 != sensor2:
-                # Ensure the bins are same but sensors are different
-                c = "%s/%s-%s" % (sensor1, sensor2, bin1)
-                df[c] = df[a] / df[b]
+                # Pick an axes
+                ax = axes[k]
 
-    # Sometimes there are zero counts so will yield NaN or Inf
-    df = df.fillna(0)
-    df = df.replace(np.inf, 0)
-    return df
+                # Label lines
+                label = r"\SI{%s}{\um}" % (bin1)
+                fit_label = r"Best fit " + label
+
+                # Plot one sensor against other
+                df.plot(x=a, y=b, ax=ax, kind='scatter', label=label)
+
+                # Regression analysis
+                x = df[a].values
+                y = df[b].values
+                results = regression(x, y)
+                slope = results[0]
+                intercept = results[2]
+
+                # Create best fit line
+                yf = polyval([slope, intercept], x)
+                ax.plot(x, yf, label=fit_label)
+                ax.legend(loc='lower right')
+
+                # Print regression results to file
+                with open(data_path, 'w') as f:
+                    bin = "%s," % (bin1)
+                    line = bin + "%.5f,%.5f,%.5f,%.5f,%.5f,\n" % (results)
+                    f.write('Bin, Slope, Slope error, Intercept, Intercept error, R Squared,\n')
+                    f.write(line)
+
+                # Store regression results in dict for output
+                reg_dict[bin1] = {'slope': results[0],
+                                  'slope error': results[1],
+                                  'intercept': results[2],
+                                  'intercept error': results[3],
+                                  'rs': results[4]}
+
+                # Increment for axes
+                k += 1
+
+    # Modify then save plot
+    plot_path = saveplot(plot_path, name, "scatter", fig)
+    paths['scatter'] = plot_path
+    plt.close()
+    return paths, reg_dict
+
+
+def regression(x, y):
+    # Add a column of 1s to ensure intercept can be calculated
+    # by regression analysis of statsmodel
+    x = sm.add_constant(x, prepend=False)
+    # Linear regression
+    result = sm.OLS(y, x).fit()
+    slope, intercept = result.params
+    slopeerr, intercepterr = result.bse
+    rs = result.rsquared
+    results = (slope, slopeerr, intercept, intercepterr, rs)
+    return results
+
+
+def regression_table(dict, order, path, name):
+    """
+    Generate a latex table out of regression analysis of each particle size
+    """
+    bins = ['0.5', '2.5']
+    first = (r'\begin{tabular}{ccccccc}' + '\n'
+             r'\multirow{2}{*}{Particle size} & ' +
+             r'\multicolumn{3}{c}{\SI{0.5}{\um}} & ' +
+             r'\multicolumn{3}{c}{\SI{2.5}{\um}} \\' + '\n')
+    labels = ['Slope', 'Intercept', 'R-Squared']
+    second = ('& ' + ' & '.join(labels) + ' & ' +
+              ' & '.join(labels) + ' \\\\ \n \\toprule\n')
+
+    line = []
+    lines = []
+    # loop over particle sizes and bins
+    for x in order:
+        line += [x]
+        for y in bins:
+            a = dict[x][y]
+            slope = '$%.3f \\pm %.3f$' % (a['slope'], a['slope error'])
+            intercept = '$%.3f \\pm %.3f$' % (a['intercept'], a['intercept error'])
+            rs = '%.3f' % a['rs']
+            line += [slope, intercept, rs]
+        lines += ' & '.join(line) + ' \\\\ \n'
+        line = []
+
+    # Join parts of table together
+    table = first + second + ''.join(lines) + '\\bottomrule \n\\end{tabular}'
+
+    filename = name + "-regression.tex"
+    path = os.path.join(path, filename)
+    with open(path, 'w') as f:
+        f.write(table)
+    return path
