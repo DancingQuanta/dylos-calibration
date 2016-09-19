@@ -4,6 +4,7 @@ Calibration of Dylos by Alphasense OPCN2
 Dylos Raspberry Pi
 ------------------
 
+The time is not set to local time because I kept forgetting it so I keep tract of time differences every morning.
 Time is offset by about 23 minutes which was due to accidentally pulling power out while preparing experiment.
 
 Timeline
@@ -85,9 +86,17 @@ Lost the data...
 16/09/16
 --------
  
-Pi 17:06 to correct time 18:30
+Pi 17:06 to correct time 18:30 
 
 14:30 Started Pump
 14:40 Introduced 0.8um particles
 15:45 Introduced 0.4um particles
 17:05 Introduced 0.3um particles
+
+19/09/16
+--------
+ 
+Pi time 7:56 correct time 9:20
+
+09:15 Started pump
+09:45 Introduced 0.2um
