@@ -79,7 +79,7 @@ def save_latex(df, path, name, kind, **kwargs):
 
     """
     latex = df.to_latex(**kwargs)
-    filename = name + "-" + kind +  ".tex"
+    filename = name + "-" + kind + ".tex"
     path = os.path.join(path, filename)
     with open(path, 'w') as f:
         f.write(latex)
@@ -107,7 +107,6 @@ def statistics(midpoints, counts):
     Returns:
 
     """
-    totalCounts = np.sum(counts)
     # Mean
     mean = nmoment(midpoints, counts, 0, 1)
 
