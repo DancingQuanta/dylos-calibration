@@ -280,10 +280,7 @@ def experiments(expDict, sensors):
         dict['plot'] = plot(df, imgs_dir, caliName)
 
         # Take a mean and ste
-        paths, stats = cali_regression(df,
-                                       imgs_dir,
-                                       processed_data_dir,
-                                       name)
+        paths, stats = calibrate(df, imgs_dir, processed_data_dir, name)
 
         reg_dict[exp] = stats
         dict['regression'] = paths
