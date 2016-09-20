@@ -2,19 +2,180 @@
 # -*- coding: utf-8 -*-
 
 import os
-import matplotlib
-import json
-import yaml
 import argparse
-from src.modules.data import *
-from src.modules.analysis import *
 from datetime import datetime, timedelta
-from pint import UnitRegistry
-import copy
 import logging
+import json
+import pandas as pd
+from pint import UnitRegistry
+import yaml
+from collections import defaultdict
 
 
-def loadSensorsData(sensors, sensorsFile, outputUnit):
+def date_handler(obj):
+    # Handles datetime object before json serialising it
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    # else:
+        # raise TypeError
+
+
+def load_data(path, bins, string):
+    """Load binned data into a Pandas.DataFrame where first column is datetime,
+    each columns represent a bin and name each column according to a list of
+    floats in argument.
+
+    Args:
+        path : string
+            path to datafile
+        bins : list
+        List of floats of bin boundaries, where every except the last element
+        represent lower bin boundary and the last is uppper bin boundary of the
+        last bin.
+    Returns:
+        df: Pandas.DataFrame
+
+    """
+    # Use list of bin boundaries to generate a list of bin labels for the
+    # DataFrame
+    bins = generateBinLabels(bins, string)
+
+    # Set the labels of DataFrame columns
+    # Generate indexes of elements in columns to load, if any element is an
+    # empty string do not include its index.
+    cols = ['DateTime'] + bins['columns']
+    usecols = [0] + [x + 1 for x in bins['index']]
+
+    # Load data
+    df = pd.read_csv(path,
+                     parse_dates={"Datetime": [0]},
+                     index_col='Datetime',
+                     infer_datetime_format=True,
+                     header=None,
+                     names=cols,
+                     usecols=usecols)
+
+    # Return the data
+    return df, bins['bounds']
+
+
+def generateBinLabels(binsList, string):
+    """ Prepend a string to a list of bins boundaries to label each bin.
+    Loop over bin boundaries list and if an element is an integer prepend
+    given string to the integer and if not an integer leave an empty string
+    in its place in list.
+
+    Args:
+        binsList: list of ints
+            list of lower bin boundaries with last element being upper
+            boundary of last bin.
+        string: str
+            string to be prepanded, ideally name of sensor
+
+    Returns:
+        bins: dict
+            The dict contain three key-values pair; columns, bounds,
+            stringbins.
+                columns key is for labelling Pandas DataFrame columns
+            bounds is the bin boundaries list minus any empty element.
+            stringbins is the bin boundaries as string for display
+
+    """
+    columns = []
+    newBinsList = []
+    chosen_index = []
+
+    for ix, val in enumerate(binsList):
+        if isinstance(val, (int, float)):
+            chosen_index = chosen_index + [ix]
+            columns = columns + ["%s-%s" % (string, val)]
+            newBinsList = newBinsList + [val]
+
+    # Drop last element
+    chosen_index = chosen_index[:-1]
+    columns = columns[:-1]
+
+    # Return dict of bin labels and bin value lists
+    bins = {'columns': columns, 'bounds': newBinsList, 'index': chosen_index}
+    return bins
+
+
+def writeData(df, path, filename):
+    """Write Pandas.DataFrame to csv file
+    Args:
+        df: Pandas.DataFrame
+        path: string
+            Path to location of file
+        filename: str
+            Name of the file
+    Returns: None
+    """
+    filename = filename + ".csv"
+    path = os.path.join(path, filename)
+    df.to_csv(path)
+    return path
+
+
+def realCounts(data):
+    """Subtract the upper bins from the lower bins
+    """
+    # Get number of columns, loop over, sum upper and subtract from lower.
+    columns = data.columns
+    for i in range(0, len(columns)):
+        sumup = data[columns[(i+1):]].sum(axis=1)
+        data[columns[i]] = data[columns[i]] - sumup
+    return data
+
+
+if __name__ == '__main__':
+    # Get filenames to work with
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("settings", help="Settings yaml file")
+    parser.add_argument("sensors", help="Sensors defintions yaml file")
+    parser.add_argument("rawdatadir", help="Raw Data directory")
+    parser.add_argument("-o", "--output",
+                        help="Directs the output to a name of your choice")
+
+    options = parser.parse_args()
+    settingsFile = options.settings    # Settings file
+    sensorsFile = options.sensors      # Sensor configuration file
+    raw_data_dir = options.rawdatadir  # Root directory of raw data
+    outputFile = options.output        # Output directory
+
+    name = os.path.basename(settingsFile)
+    name = os.path.splitext(name)[0]
+
+    # Create output directory
+    filename = os.path.basename(outputFile)
+    name = os.path.splitext(filename)[0]
+    path = os.path.abspath(os.path.dirname(outputFile))
+    output_dir = os.path.join(path, name)
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+
+    # Initialise pint's UnitRegistry
+    ureg = UnitRegistry()
+
+    # Load settings yaml file
+    with open(settingsFile) as handle:
+        settings = yaml.load(handle)
+
+    # Final particle concentration
+    outputUnit = ureg(settings['output']['unit'])
+
+    # Sensors
+    sensors = settings['sensors']
+
+    # Experimental conditions
+    exps = settings['exp']
+
+    # Conditions
+    order = exps['order']
+    conditions = exps['conditions']
+    # Add keys to conditions
+    for a in list(conditions):
+        conditions[a]['sensor'] = {}
+
     # Load sensors definitions
     with open(sensorsFile) as handle:
         sensorDefinition = yaml.load(handle)
@@ -28,9 +189,6 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
         # Load config for a sensor
         config = sensors[sensor]
 
-        # Name the dataset
-        sensorName = config['id']
-
         # What type of sensor it is?
         type = config['type']
 
@@ -39,14 +197,16 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
 
         # Where is the data in data/raw/?
         sensor_dir = config['path']
-        data_dir = os.path.join(project_dir, "data", "raw", sensor_dir)
+        data_dir = os.path.join(raw_data_dir, sensor_dir)
 
         # Fetch information about bin boundaries for this sensor
         bins = config['bins']
 
         # Load data
-        bins = loadData(data_dir, bins, sensorName)
-        data = bins['data']
+        data, bins = load_data(data_dir, bins, sensor)
+
+        # Update bins
+        config['bins'] = bins
 
         # If the data is not in minute frequency, resample it
         if 'resample' in config:
@@ -98,7 +258,6 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
         rate_test = counts_test / time_test
         flowrate_test = vol_test * rate_test
 
-
         # Compare dimensionality of input data and output unit
         # If output unit is concentration
         if outputUnit.dimensionality == conc_test.dimensionality:
@@ -111,7 +270,7 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
                     config['concentration'] = str('{:.03f~}'.format(inputUnit))
                 # Calculate count rate if not exists
                 if 'count rate' not in config:
-                    countrate = (inputFlowrate * inputUnit).to('counts per second')
+                    countrate = (inputFlowrate * inputUnit).to('counts/s')
                     config['count rate'] = str('{:.03f~}'.format(countrate))
 
             # If input unit is count rate
@@ -131,102 +290,54 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
             raise ValueError(msg)
 
         config['scale factor'] = scale
-
-        # Multiply the data with scale factor and update binDate dict
-        bins['data'] = data*scale
         debug = "The scaling factor is %s" % (scale)
         logging.debug(debug)
-
-        # Update settings dict with bins
-        config['bins'] = bins
-
-        # Write the results to disk
-        writeData(bins['data'], base_interim_data_dir, sensorName)
 
         # Update sensor dict with settings
         sensors[sensor] = config
 
-    logging.debug("Rebinning calibrater")
+        # Multiply the data with scale factor
+        data = data*scale
 
-    # Rebin calibrater data to calibratee bin boundaries
-    calibratee = sensors['calibratee']['bins']
-    # Calibrater
-    calibrater = sensors['calibrater']['bins']
+        # Save processed data
+        full_path = os.path.join(output_dir, 'full')
+        if not os.path.isdir(full_path):
+            os.makedirs(full_path)
+        path = writeData(data, full_path, sensor)
 
-    # Bin boundaries of final set of bins
-    finalBins = calibratee['bounds']
+        conditions['full'] = {}
+        conditions['full']['sensor'] = {}
+        conditions['full']['sensor'][sensor] = {}
+        conditions['full']['sensor'][sensor]['data'] = path
 
-    # rebin calibrater dataset to match calibratee dataset
-    rebinned = rebin(calibrater, finalBins)
-    name = "rebinned-" + sensors['calibrater']['id']
-    writeData(rebinned['data'], base_interim_data_dir, name)
-    debug = ("Start: %s, end: %s" % (rebinned['data'].index[0],
-                                     rebinned['data'].index[-1]))
-    logging.debug(debug)
-    sensors['rebinned'] = {'id': name, 'bins': rebinned}
-    return sensors
+        # Loop over different conditions and save part of data relevant to that
+        # period
 
+        logging.debug("Experiment time")
+        # Iterate over different experiment conditions
+        for exp in order:
+            condition = conditions[exp]
 
-if __name__ == '__main__':
+            # Load start and end datetime for time series data
+            start = condition['start']
+            end = condition['end']
 
-    # Get filenames to work with
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument("settings", help="Settings yaml file")
-    parser.add_argument("sensors", help="Sensors defintions yaml file")
-    parser.add_argument("-o", "--output", help="Directs the output to a name of your choice")
+            # Make condition path if not exist
+            path = os.path.join(output_dir, exp)
+            if not os.path.isdir(path):
+                os.makedirs(path)
 
-    options = parser.parse_args()
-    settingsFile = options.settings
-    sensorsFile = options.sensors
-    outputFile = options.output
+            # Write selected data to file
+            path = writeData(data.loc[start:end], path, sensor)
 
-    name = os.path.basename(settingsFile)
-    name = os.path.splitext(name)[0]
+            condition['sensor'][sensor] = {'data': path}
 
-    # Base project directory
-    project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
-    project_dir = os.path.abspath(project_dir)
+            conditions[exp] = condition
 
-    # Create some directories if they do not exist
-
-    # Base imgs directory
-    base_imgs_dir = os.path.join(project_dir, "imgs", name)
-    if not os.path.isdir(base_imgs_dir):
-        os.makedirs(base_imgs_dir)
-
-    # Base interim data directory
-    base_interim_data_dir = os.path.join(project_dir, "data", "interim", name)
-    if not os.path.isdir(base_interim_data_dir):
-        os.makedirs(base_interim_data_dir)
-
-    # Base processed data directory
-    base_processed_data_dir = os.path.join(project_dir, "data", "processed", name)
-    if not os.path.isdir(base_processed_data_dir):
-        os.makedirs(base_processed_data_dir)
-
-    # Initialise pint's UnitRegistry
-    ureg = UnitRegistry()
-
-    # Load settings yaml file
-    with open(settingsFile) as handle:
-        settings = yaml.load(handle)
-
-    # Final particle concentration
-    outputUnit = ureg(settings['output']['unit'])
-
-    # Sensors
-    sensorsDict = settings['sensors']
-
-    # Load information about sensors and load data for each sensor
-    sensorsDict = loadSensorsData(sensorsDict, sensorsFile, outputUnit)
+    exps['conditions'] = conditions
 
     # Output processed data
-    settings['sensors'] = sensorsDict
-    outputDict = settings
-    path = os.path.dirname(outputFile)
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    dump = json.dumps(outputDict, default=date_handler,
-                     sort_keys=True, indent=4).replace("\\\\", "/")
+    dump = json.dumps(settings, default=date_handler,
+                      sort_keys=True, indent=4).replace("\\\\", "/")
     with open(outputFile, 'w') as outfile:
             outfile.write(dump)
