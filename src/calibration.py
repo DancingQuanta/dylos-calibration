@@ -186,9 +186,6 @@ def loadSensorsData(sensors, sensorsFile, outputUnit):
 def experiments(expDict, sensors):
     # Experiments
 
-    # # Load experiment information such as times of stimulus
-    # with open(expFile) as handle:
-        # configDict = yaml.load(handle)
     order = expDict['order']
     conditions = expDict['conditions']
 
@@ -248,11 +245,10 @@ def experiments(expDict, sensors):
             logging.debug(debug)
 
             # Does data from this sensor need processing?
-            if 'process' in sensorDict:
-                # Check if any bins have zero counts and drop them
-                if 'prunebins' in sensorDict['process']:
-                    # Prune bins from data that have zero counts
-                    sample = pruneBins(sample)
+            # Check if any bins have zero counts and drop them
+            if 'prunebins' in sensorDict:
+                # Prune bins from data that have zero counts
+                sample = pruneBins(sample)
 
             # Write sample to file
             writeData(sample['data'], interim_data_dir, sensorName)
