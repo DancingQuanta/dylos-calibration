@@ -136,6 +136,7 @@ def writeData(df, path, filename):
     filename = filename + ".csv"
     path = os.path.join(path, filename)
     df.to_csv(path)
+    return path
 
 
 def continuousFill(data):
