@@ -7,14 +7,20 @@
 RAW := data/raw
 PROCESSED := data/processed
 INTERIM := data/interim
+IMGS := imgs
 SENSORS := src/sensors/sensors.yaml
 SETTINGS := settings
 
 DATA := $(shell find $(RAW)/ -name '*.log')
 YAML := $(shell find $(SETTINGS)/ -name '*.yaml')
-INTERIM_DATA := $(addprefix $(INTERIM)/,$(notdir $(patsubst %.yaml,%.json,$(YAML))))
+INTERIM_SETTINGS := $(addprefix $(INTERIM)/,$(notdir $(patsubst %.yaml,%.json,$(YAML))))
+INTERIM_DATA := $(shell find $(INTERIM)/ -name '*.csv')
+PLOT_DATA := $(patsubst $(INTERIM)/%-plot.csv,$(IMGS)/%.png,$(INTERIM_DATA))
+HIST_DATA := $(patsubst $(INTERIM)/%-hist.csv,$(IMGS)/%.png,$(INTERIM_DATA))
 
 PROCESS_SCRIPT := src/data/process.py
+CALIBRATION_SCRIPT := src/data/calibration.py
+PLOT_SCRIPT := src/visualisation/plot.py
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -25,7 +31,11 @@ requirements:
 
 docs: requirements
 
-data: $(INTERIM_DATA)
+data: $(INTERIM_SETTINGS)
+
+calibrate: $(INTERIM_SETTINGS)
+
+plot: $(PLOT_DATA)
 
 cleandata:
 	rm -rf $(INTERIM)/*
@@ -40,8 +50,14 @@ lint:
 # PROJECT RULES                                                                 #
 #################################################################################
 
-$(INTERIM_DATA): $(PROCESS_SCRIPT) $(YAML) $(SENSORS) $(DATA)
-	python $(PROCESS_SCRIPT) $(YAML) $(SENSORS) $(RAW) -o $@
+$(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
+	python $(PROCESS_SCRIPT) $< $(SENSORS) $(RAW) -o $@
+
+$(INTERIM)/%.json: $(INTERIM)/%.json $(DATA) $(CALIBRATION_SCRIPT)
+	python $(CALIBRATION_SCRIPT) $< -o $@
+
+$(IMGS)/%.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
+	python $(PLOT_SCRIPT) $< -o $@
 
 # generate PDF
 %.pdf: %.tex
