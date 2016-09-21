@@ -69,7 +69,7 @@ $(PROCESSED)/$(CALI_SETTINGS)/%.tex: $(PROCESSED)/$(CALI_SETTINGS)/%.json $(CALI
 
 # Dylos report
 $(PROCESSED)/$(DYLOS_SETTINGS)/%.json: $(DYLOS_SETTINGS)/%.yaml $(DATA)
-	python  $< -o $@
+	python $(DYLOS_SCRIPT) $< -o $@
 
 $(PROCESSED)/$(DYLOS_SETTINGS)/%.tex: $(PROCESSED)/$(DYLOS_SETTINGS)/%.json $(DYLOS_TEMPLATE)
 	python $(GEN_SCRIPT) $(DYLOS_TEMPLATE) $< $@ 
