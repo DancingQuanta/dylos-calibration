@@ -1,0 +1,26 @@
+sensors:
+  calibratee:
+    id: dylos
+    path: "dylos-alpha/retry-09-16/prep/Dylos"
+    type: dylos
+  calibrater:
+    id: alpha
+    path: "dylos-alpha/retry-09-16/prep/split-Alpha/Alpha"
+    type: opcn2
+    prunebins:
+output:
+  author: Andrew Tolmie
+  title: Aerosol calibration of Dylos and Alphasense OPCN2
+  unit: 'count per cubic cm'
+exp:
+  order: ["full", "0.4", "0.8"]
+  conditions:
+    "full":
+      start: 2016-09-08 13:20:00
+      end: 2016-09-09 15:20:00
+    "0.8":
+      start: 2016-09-08 13:20:00
+      end: 2016-09-08 14:20:00
+    "0.4":
+      start: 2016-09-08 14:20:00
+      end: 2016-09-09 15:20:00

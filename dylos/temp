@@ -1,0 +1,5 @@
+%\input{\VAR{condition['dylos1']['histogram']['histplot']['histlog']}} &
+%\input{\VAR{condition['dylos2']['histogram']['histplot']['histlog']}} \\
+%\input{\VAR{condition['dylos1']['histogram']['histdata']}} &
+%\input{\VAR{condition['dylos1']['histogram']['histdata']}} \\
+
