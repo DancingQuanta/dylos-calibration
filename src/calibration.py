@@ -23,12 +23,6 @@ logging.basicConfig(filename='log',
 # matplotlib.style.use('ggplot')
 pd.options.display.float_format = '{:.2f}'.format
 
-# matplotlib settings
-params = {
-    "figure.figsize": figsize(0.49),     # fig size for latex
-    }
-matplotlib.rcParams.update(params)
-
 
 def loadSensorsData(sensors, sensorsFile, outputUnit):
     # Load sensors definitions
@@ -297,12 +291,22 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("settings", help="Settings yaml file")
     parser.add_argument("sensors", help="Sensors defintions yaml file")
-    parser.add_argument("-o", "--output", help="Directs the output to a name of your choice")
+    parser.add_argument("-o", "--output",
+                        help="Directs the output to a name of your choice")
+    parser.add_argument("-f", "--figsize", help="Figure size")
 
     options = parser.parse_args()
     settingsFile = options.settings
     sensorsFile = options.sensors
     outputFile = options.output
+    fig_size = options.figsize
+
+    # Set figure size
+    if fig_size is not None:
+        params = {"figure.figsize": figsize(fig_size)}
+    else:
+        params = {"figure.figsize": figsize(0.49)}
+    matplotlib.rcParams.update(params)
 
     name = os.path.basename(settingsFile)
     name = os.path.splitext(name)[0]

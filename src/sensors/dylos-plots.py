@@ -40,7 +40,6 @@ params = {                      # setup matplotlib to use latex for output
     "legend.fontsize": 8,               # Make the legend/label fonts a little smaller
     "xtick.labelsize": 8,
     "ytick.labelsize": 8,
-    "figure.figsize": figsize(0.49),     # default fig size of 0.9 textwidth
     "pgf.preamble": [
         r"\usepackage[utf8x]{inputenc}",    # use utf8 fonts becasue your computer can handle it :)
         r"\usepackage[T1]{fontenc}",        # plots will be generated using this preamble
@@ -128,11 +127,21 @@ if __name__ == '__main__':
     # Get filenames to work with
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("settings", help="Settings yaml file")
-    parser.add_argument("-o", "--output", help="Directs the output to a name of your choice")
+    parser.add_argument("-o", "--output",
+                        help="Directs the output to a name of your choice")
+    parser.add_argument("-f", "--figsize", help="Figure size")
 
     options = parser.parse_args()
     settingsFile = options.settings
     outputFile = options.output
+    fig_size = options.figsize
+
+    # Set figure size
+    if fig_size is not None:
+        params = {"figure.figsize": figsize(fig_size)}
+    else:
+        params = {"figure.figsize": figsize(0.49)}
+    matplotlib.rcParams.update(params)
 
     name = os.path.basename(settingsFile)
     name = os.path.splitext(name)[0]
