@@ -123,3 +123,31 @@ def statistics(midpoints, counts):
     upper = mean + 2 * std
 
     return mean, std, lower, upper
+
+
+def pruneBins(df):
+    """Drop bins if they have zero counts in the mean.
+
+    Args:
+        data : Pandas.DataFrame
+    Returns:
+        data; Pandas.DataFrame
+            The dataframe will have fewer columns.
+    """
+    # Initialise new dataframe
+    df1 = pd.DataFrame(columns=['Counts'])
+    df1['Counts'] = df.mean(axis=0)
+
+    # Loop over columns
+    for ix, key in enumerate(df1.index):
+        counts = np.round(df1['Counts'].iloc[ix])
+        # Do not want to display histogram of bins at large sizes if
+        # the counts is zero.
+        if counts == 0:
+            zeroColumns = zeroColumns + [ix]
+        elif counts > 0:
+            zeroColumns = []
+
+    # Drop columns using zeroColumns
+    df = df.drop(df.columns[zeroColumns], axis=1)
+    return df
