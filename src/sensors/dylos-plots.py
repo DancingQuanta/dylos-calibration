@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     # Set figure size
     if fig_size is not None:
-        params = {"figure.figsize": figsize(fig_size)}
+        params = {"figure.figsize": figsize(float(fig_size))}
     else:
         params = {"figure.figsize": figsize(0.49)}
     matplotlib.rcParams.update(params)
