@@ -22,6 +22,10 @@ PROCESS_SCRIPT := src/data/process.py
 CALIBRATION_SCRIPT := src/data/calibration.py
 PLOT_SCRIPT := src/visualisation/plot.py
 
+# Tikz
+TIKZ := $(shell find $(IMGS)/ -name '*.tikz')
+TIKZPDF = $(patsubst %.tikz,%.pdf,$(TIKZ))
+
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
@@ -36,6 +40,8 @@ data: $(INTERIM_SETTINGS)
 calibrate: $(INTERIM_SETTINGS)
 
 plot: $(PLOT_DATA)
+
+figures: $(TIKZPDF)
 
 cleandata:
 	rm -rf $(INTERIM)/*
@@ -59,6 +65,14 @@ $(INTERIM)/%.json: $(INTERIM)/%.json $(DATA) $(CALIBRATION_SCRIPT)
 $(IMGS)/%.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@
 
+# Generate PDF from TIKZ
+%.pdf: %.tikz $(FIGURES)
+	FILE=$(notdir $<)
+	cd $(dir $<); \
+	pdflatex $(notdir $<); \
+	rm -f *.aux *.end *.fls *.log *.out *.fdb_latexmk
+	@echo $<
+
 # generate PDF
 %.pdf: %.tex
 	FILE=$(notdir $*)
@@ -66,4 +80,3 @@ $(IMGS)/%.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	latexmk -pdf -pv -pdflatex="pdflatex --shell-escape -halt-on-error %O %S" $(notdir $*); \
 	rm -f *.aux *.end *.fls *.log *.out *.fdb_latexmk *.bbl *.bcf *.blg *-blx.aux *-blx.bib *.brf *.run.xml
 	@echo $*
-
