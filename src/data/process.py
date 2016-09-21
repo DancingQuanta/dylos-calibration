@@ -10,6 +10,7 @@ import pandas as pd
 from pint import UnitRegistry
 import yaml
 from collections import defaultdict
+from utils import gen_bin_labels
 
 
 def date_handler(obj):
@@ -38,7 +39,7 @@ def load_data(path, bins, string):
     """
     # Use list of bin boundaries to generate a list of bin labels for the
     # DataFrame
-    bins = generateBinLabels(bins, string)
+    bins = gen_bin_labels(bins, string)
 
     # Set the labels of DataFrame columns
     # Generate indexes of elements in columns to load, if any element is an
@@ -57,47 +58,6 @@ def load_data(path, bins, string):
 
     # Return the data
     return df, bins['bounds']
-
-
-def generateBinLabels(binsList, string):
-    """ Prepend a string to a list of bins boundaries to label each bin.
-    Loop over bin boundaries list and if an element is an integer prepend
-    given string to the integer and if not an integer leave an empty string
-    in its place in list.
-
-    Args:
-        binsList: list of ints
-            list of lower bin boundaries with last element being upper
-            boundary of last bin.
-        string: str
-            string to be prepanded, ideally name of sensor
-
-    Returns:
-        bins: dict
-            The dict contain three key-values pair; columns, bounds,
-            stringbins.
-                columns key is for labelling Pandas DataFrame columns
-            bounds is the bin boundaries list minus any empty element.
-            stringbins is the bin boundaries as string for display
-
-    """
-    columns = []
-    newBinsList = []
-    chosen_index = []
-
-    for ix, val in enumerate(binsList):
-        if isinstance(val, (int, float)):
-            chosen_index = chosen_index + [ix]
-            columns = columns + ["%s-%s" % (string, val)]
-            newBinsList = newBinsList + [val]
-
-    # Drop last element
-    chosen_index = chosen_index[:-1]
-    columns = columns[:-1]
-
-    # Return dict of bin labels and bin value lists
-    bins = {'columns': columns, 'bounds': newBinsList, 'index': chosen_index}
-    return bins
 
 
 def writeData(df, path, filename):
@@ -125,6 +85,34 @@ def realCounts(data):
         sumup = data[columns[(i+1):]].sum(axis=1)
         data[columns[i]] = data[columns[i]] - sumup
     return data
+
+
+def pruneBins(df):
+    """Drop bins if they have zero counts in the mean.
+
+    Args:
+        data : Pandas.DataFrame
+    Returns:
+        data; Pandas.DataFrame
+            The dataframe will have fewer columns.
+    """
+    # Initialise new dataframe
+    df1 = pd.DataFrame(columns=['Counts'])
+    df1['Counts'] = df.mean(axis=0)
+
+    # Loop over columns
+    for ix, key in enumerate(df1.index):
+        counts = np.round(df1['Counts'].iloc[ix])
+        # Do not want to display histogram of bins at large sizes if
+        # the counts is zero.
+        if counts == 0:
+            zeroColumns = zeroColumns + [ix]
+        elif counts > 0:
+            zeroColumns = []
+
+    # Drop columns using zeroColumns
+    df = df.drop(df.columns[zeroColumns], axis=1)
+    return df
 
 
 if __name__ == '__main__':
@@ -316,19 +304,27 @@ if __name__ == '__main__':
         logging.debug("Experiment time")
         # Iterate over different experiment conditions
         for exp in order:
+            # Make condition path if not exist
+            path = os.path.join(output_dir, exp)
+            if not os.path.isdir(path):
+                os.makedirs(path)
+
             condition = conditions[exp]
 
             # Load start and end datetime for time series data
             start = condition['start']
             end = condition['end']
 
-            # Make condition path if not exist
-            path = os.path.join(output_dir, exp)
-            if not os.path.isdir(path):
-                os.makedirs(path)
+            # Select data
+            sample = data.loc[start:end].copy(deep=True)
+
+            # Check if any bins have zero counts and drop them
+            if 'prunebins' in sensors:
+                # Prune bins from data that have zero counts
+                sample = pruneBins(sample)
 
             # Write selected data to file
-            path = writeData(data.loc[start:end], path, sensor)
+            path = writeData(sample, path, sensor)
 
             condition['sensor'][sensor] = {'data': path}
 
