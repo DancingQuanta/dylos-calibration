@@ -4,6 +4,8 @@
 # GLOBALS                                                                       #
 #################################################################################
 
+FIG_SIZE := 0.29
+
 RAW := data/raw
 PROCESSED := data/processed
 INTERIM := data/interim
@@ -21,6 +23,8 @@ HIST_DATA := $(patsubst $(INTERIM)/%-hist.csv,$(IMGS)/%.png,$(INTERIM_DATA))
 PROCESS_SCRIPT := src/data/process.py
 CALIBRATION_SCRIPT := src/data/calibration.py
 PLOT_SCRIPT := src/visualisation/plot.py
+
+FIGURES := $(shell find $(IMGS)/ -name '*.pgf')
 
 # Tikz
 TIKZ := $(shell find $(IMGS)/ -name '*.tikz')
@@ -60,7 +64,10 @@ $(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
 	python $(PROCESS_SCRIPT) $< $(SENSORS) $(RAW) -o $@
 
 $(INTERIM)/%.json: $(INTERIM)/%.json $(DATA) $(CALIBRATION_SCRIPT)
-	python $(CALIBRATION_SCRIPT) $< -o $@
+	python $(CALIBRATION_SCRIPT) $< -o $@ 
+
+$(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
+	python $(PLOT_SCRIPT) $< -o $@ -f $(FIG_SIZE)
 
 $(IMGS)/%.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@

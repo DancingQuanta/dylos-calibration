@@ -2,49 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import os
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
-
-# # matplotlib settings
-# params = {
-# "figure.figsize": figsize(0.49),     # fig size for latex
-# }
-# matplotlib.rcParams.update(params)
-
-
-def load_data(path):
-    """Load a dataset
-    """
-    df = pd.read_csv(path,
-                     parse_dates=[0],
-                     index_col='Datetime',
-                     infer_datetime_format=True)
-    return df
-
+from utils import *
 
 def index_mins(df):
-    period = df.index - df.index[0]
+    period = (df.index - df.index[0]).astype('timedelta64')
     mins = period.total_seconds() / 60
     df.index = mins
     return df
-
-
-def saveplot(path, fig, **kwargs):
-    print("Plotting: %s" % (path))
-    filename = os.path.basename(path)
-    ext = os.path.splitext(filename)[-1]
-    if ext is not ".pgf":
-        # Save plot in original extension without kwargs
-        fig.savefig(path)
-        # Then save plot as pgf
-        name = os.path.splitext(filename)[0]
-        filename = name + ".pgf"
-        dir = os.path.dirname(path)
-        path = os.path.join(dir, filename)
-        fig.savefig(path, **kwargs)
-    else:
-        fig.savefig(path, **kwargs)
 
 
 def plot(df, path):
@@ -75,13 +43,23 @@ if __name__ == '__main__':
     parser.add_argument("data", help="Date file")
     parser.add_argument("-o", "--output",
                         help="Directs the output to a name of your choice")
+    parser.add_argument("-f", "--figsize",
+                        help="Figure size")
 
     options = parser.parse_args()
     data_path = options.data
     output_file = options.output
+    fig_size = options.figsize
+
+    # Set figure size
+    if fig_size is not None:
+        params = {"figure.figsize": figsize(float(fig_size))}
+    else:
+        params = {"figure.figsize": figsize(0.49)}
+    matplotlib.rcParams.update(params)
 
     # load data
     df = load_data(data_path)
 
     # Plot data
-    plot(df)
+    plot(df, output_file)
