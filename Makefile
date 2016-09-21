@@ -4,6 +4,8 @@
 # GLOBALS                                                                       #
 #################################################################################
 
+FIG_SIZE := 0.29
+
 PROCESSED=data/processed
 SENSORS=src/sensors/sensors.yaml
 PROCESSED_CALI = $(PROCESSED)/$(CALI_SETTINGS)
@@ -62,14 +64,14 @@ lint:
 
 # Generate a report for calibration
 $(PROCESSED)/$(CALI_SETTINGS)/%.json: $(CALI_SETTINGS)/%.yaml $(SENSORS) $(DATA)
-	python $(CALIBRATION_SCRIPT) $< $(SENSORS) -o $@
+	python $(CALIBRATION_SCRIPT) $< $(SENSORS) -o $@ -f $(FIG_SIZE)
 
 $(PROCESSED)/$(CALI_SETTINGS)/%.tex: $(PROCESSED)/$(CALI_SETTINGS)/%.json $(CALI_TEMPLATE)
 	python $(GEN_SCRIPT) $(CALI_TEMPLATE) $< $@ 
 
 # Dylos report
 $(PROCESSED)/$(DYLOS_SETTINGS)/%.json: $(DYLOS_SETTINGS)/%.yaml $(DATA)
-	python $(DYLOS_SCRIPT) $< -o $@
+	python $(DYLOS_SCRIPT) $< -o $@ -f $(FIG_SIZE)
 
 $(PROCESSED)/$(DYLOS_SETTINGS)/%.tex: $(PROCESSED)/$(DYLOS_SETTINGS)/%.json $(DYLOS_TEMPLATE)
 	python $(GEN_SCRIPT) $(DYLOS_TEMPLATE) $< $@ 
