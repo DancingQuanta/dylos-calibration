@@ -17,12 +17,14 @@ DATA := $(shell find $(RAW)/ -name '*.log')
 YAML := $(shell find $(SETTINGS)/ -name '*.yaml')
 INTERIM_SETTINGS := $(addprefix $(INTERIM)/,$(notdir $(patsubst %.yaml,%.json,$(YAML))))
 INTERIM_DATA := $(shell find $(INTERIM)/ -name '*.csv')
-PLOT_DATA := $(patsubst $(INTERIM)/%-plot.csv,$(IMGS)/%.png,$(INTERIM_DATA))
-HIST_DATA := $(patsubst $(INTERIM)/%-hist.csv,$(IMGS)/%.png,$(INTERIM_DATA))
+PLOT_DATA := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-plot.png,$(INTERIM_DATA))
+HIST_PLOT := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-hist.png,$(INTERIM_DATA))
+HIST_STATS := $(patsubst $(INTERIM)/%.csv,$(PROCESSED)/%-stats.tex,$(INTERIM_DATA))
 
 PROCESS_SCRIPT := src/data/process.py
 CALIBRATION_SCRIPT := src/data/calibration.py
 PLOT_SCRIPT := src/visualisation/plot.py
+HIST_SCRIPT := src/visualisation/hist.py
 
 FIGURES := $(shell find $(IMGS)/ -name '*.pgf')
 
@@ -44,6 +46,8 @@ data: $(INTERIM_SETTINGS)
 calibrate: $(INTERIM_SETTINGS)
 
 plot: $(PLOT_DATA)
+
+hist: $(HIST_PLOT) $(HIST_STATS)
 
 figures: $(TIKZPDF)
 
@@ -69,8 +73,8 @@ $(INTERIM)/%.json: $(INTERIM)/%.json $(DATA) $(CALIBRATION_SCRIPT)
 $(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@ -f $(FIG_SIZE)
 
-$(IMGS)/%.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
-	python $(PLOT_SCRIPT) $< -o $@
+$(IMGS)/%-hist.png $(PROCESSED)/%-hist.csv: $(INTERIM)/%.csv $(HIST_SCRIPT)
+	python $(HIST_SCRIPT) $< -p $(IMGS)/$*-hist.png -s $(PROCESSED)/$*-hist.csv -f $(FIG_SIZE)
 
 # Generate PDF from TIKZ
 %.pdf: %.tikz $(FIGURES)
