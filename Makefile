@@ -30,7 +30,6 @@ requirements:
 	pip install -q -r requirements.txt
 
 docs: requirements
-	@mkdocs serve & echo "$$!" > "mkdocs-pid"
 
 data: 
 	python -m src.data.inspect_data
