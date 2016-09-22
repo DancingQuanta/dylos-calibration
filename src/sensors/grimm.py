@@ -17,7 +17,7 @@ def averageSize(df):
     return df
 
 def rebinGrimm(data):
-    """Rebin grimm 1.108 dataset to new bin boundaries, >1um and >2.5um up to
+    """Rebin grimm 1.108 dataset to new bin boundaries, >0.5um and >2.5um up to
     10um.
     """
     bottomhalf = ['grimm-0.5', 'grimm-0.65', 'grimm-0.8',
