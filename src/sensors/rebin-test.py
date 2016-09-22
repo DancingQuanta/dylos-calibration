@@ -23,11 +23,11 @@ def test_rebin(path, old_bins, new_bins, name, rebinFunc):
     print(bins['data'])
 
     print("Mean of original data")
-    meanOrig = bins['data'].mean()
-    bins['mean'] = meanOrig
-    print(meanOrig)
-    print("Sum of mean of original data")
-    print(meanOrig.sum())
+    sum = bins['data'].sum()
+    bins['sum'] = sum
+    print(sum)
+    print("Sum of sum of original data")
+    print(sum.sum())
 
     # print("Statistics of original data")
     # midpoints = np.diff(bins['bounds'])/2 + bins['bounds'][:-1]
@@ -45,6 +45,7 @@ def test_rebin(path, old_bins, new_bins, name, rebinFunc):
     print("Output data")
     print(rebinned)
     print(rebinned.sum())
+    print(rebinned.sum().sum())
 
     # Rebin
     del bins1
@@ -52,10 +53,11 @@ def test_rebin(path, old_bins, new_bins, name, rebinFunc):
     bins1 = deepcopy(bins)
     print("Input data")
     print(bins1['data'])
-    rebinned = rebin(bins1, bins2)
+    rebinned = rebin(bins1, new_bins)
     print("Output")
     print(rebinned['data'])
     print(rebinned['data'].sum())
+    print(rebinned['data'].sum().sum())
 
 if __name__ == '__main__':
 
