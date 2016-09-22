@@ -1,11 +1,11 @@
 Sensors
 =======
 
-The sensors used in this project are optical particle counters.
-An optical particle counter counts a number of particles in air by scattering light off the particles.
-In an optical particle counter, a steady flow of air crosses a laser beam.
-The particles in the flow will cross the laser beam and scatter light off it.
-A photodetector, placed perpendicular to both air flow and laser beam, measures the amount and duration of light scattering by each particle.
+The sensors used in this project are optical particle counters (OPC).
+An OPC counts a number of particles in air by measuring the light scattered off particles.
+In an OPC, a steady flow of air crosses a laser beam.
+The particles in the air flow scatter light as they cross the laser beam and a photodetector measures the intensity and duration of scattered light.
+From the optical measurements, a number of particles could be counted into different size bins.
 
 The optical particle counters in this investigation is shown below:
 
