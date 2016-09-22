@@ -22,17 +22,7 @@ FIGURES = figures
 
 ## Figures
 
-# SVG to PDF with TEX
-SVG := $(shell find $(FIGURES) -name '*.svg')
-PDF_SVG = $(patsubst %.svg,%.pdf,$(SVG))
-PDF_TEX = $(patsubst %.svg,%.pdf_tex,$(SVG))
-PNG_SVG = $(patsubst %.svg,%.png,$(SVG))
-
-# Tikz
-TIKZ := $(shell find $(FIGURES) -name '*.tikz')
-TIKZPDF = $(patsubst %.tikz,%.pdf,$(TIKZ))
-
-FIGURES := $(shell find figures/* -type f)
+FIGURES := $(shell find ../imgs/* -type f)
 
 # Pandoc
 TEMPLATE = $(shell cygpath -w -a $(HOME)/.pandoc/tex/report.tex)
