@@ -1,17 +1,21 @@
 Grimm 1.108
 ===========
 
-The Grimm measure particle counts over a size range of 0.3 um to 20 um in 15 bins.
+The Grimm 1.108 is a portable aerosol spectrometer (PAS) which is more expensive than the Dylos.
+The Grimm measures the particle concentration over a size range of 0.3 um to 20 um in 15 bins.
+
 From the Technical section, the size are separated into bins by channels which are quoted as follows:
 
   0.3/ 0.4/ 0.5/ 0.65/ 0.8/ 1.0/ 1.6/ 2/ 3/ 4/ 5/ 7.5/ 10/ 15/ 20
 
 The given channel thresholds are valid for a count efficiency ratio of 50% with mono-disperse latex aerosol.
 
-Grimm outputs 16 bins where the extra bin is the first bin and contain an estimated value of number of particles with size greater than 0.23um. The estimation is an extrapolation using a lognormal distribution based on other bins.
+Grimm outputs 16 bins where the extra bin is the first bin and contain an estimated value of particle concentration with size greater than 0.23um.
+The estimation is an extrapolation using a lognormal distribution based on other bins.
 This bin is not taken into account in this investigation.
 
-The Grimm have various sampling frequencies and in this investigation the sample frequency is set to every 6 seconds where the measured particle counts in each bin is particle per 100 ml.
+The Grimm have various sampling frequencies and in this investigation the sample frequency is set to every 6 seconds 
+which gives particle concentration in particles per \SI{100}{\ml}.
 
 In this mode the data transmitted have three unique types of data string: P, C (small) and c (big).
 
@@ -21,8 +25,8 @@ In this mode the data transmitted have three unique types of data string: P, C (
   c00       0        0        0        0        0        0        0        0 
 
 The data in P contains the date and time down to minute resolution as well other diagnostic information about the Grimm instrument.
-The line beginning with C contains particle counts of small particles from 0.3 um to 2um separated into 8 bins.
-The line beginning with c contain particle counts of big particles from 2um to 20um um separated into 8 bins.
+The line beginning with C contains particle concentration of small particles from 0.3 um to 2um separated into 8 bins.
+The line beginning with c contain particle concentration of big particles from 2um to 20um um separated into 8 bins.
 Both the C and c begin with two digits, the first is the multiple of 6 seconds and second the number of seconds from 0 to 5.
 
 The flow rate of particles pass the laser is 1.2 l/min.
