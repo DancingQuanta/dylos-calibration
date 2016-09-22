@@ -54,17 +54,13 @@ def loadData(path, bins, string):
     usecols = [0] + [x + 1 for x in binData['index']]
 
     # Load data
-    try:
-        df = pd.read_csv(path,
-                         parse_dates={"Datetime": [0]},
-                         index_col='Datetime',
-                         infer_datetime_format=True,
-                         header=None,
-                         names=cols,
-                         usecols=usecols)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
+    df = pd.read_csv(path,
+                     parse_dates={"Datetime": [0]},
+                     index_col='Datetime',
+                     infer_datetime_format=True,
+                     header=None,
+                     names=cols,
+                     usecols=usecols)
 
     # Add data to bindata
     binData['data'] = df
