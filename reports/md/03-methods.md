@@ -14,4 +14,9 @@ When the readings of the instruments reaches near zero particles, a solution of 
 The particles is allowed to populate the box for more than 30 minutes before removing the solution.
 The process repeats for each solution of particles of different sizes.
 
+Analysis
+
+Rebin
+
+Correlation
 
