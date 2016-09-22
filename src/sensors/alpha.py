@@ -38,7 +38,7 @@ def rebinAlpha(data):
     columns = ['0.5-alpha', '2.5-alpha']
     rebinned = pd.DataFrame(index=index, columns=columns)
 
-    rebinned['0.5-alpha'] = bottom + bottom_middle
-    rebinned['2.5-alpha'] = top + top_middle
+    rebinned['0.5-alpha'] = bottom.values + bottom_middle.values
+    rebinned['2.5-alpha'] = top.values + top_middle.values
 
     return rebinned
