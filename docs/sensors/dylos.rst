@@ -1,12 +1,14 @@
 Dylos DC1100 Pro and Dylos DC1700
 =================================
 
-Both Dylos DC1100 Pro and Dylos DC1700 measures the number of particles in two size ranges >0.5um and >2.5um.
+Both Dylos DC1100 Pro and Dylos DC1700 are cheap air quality monitors with minor differences.
+They are priced at \SI{425.00}{\$} and \SI{289.99}{\$} respectively.
+The monitors measures the number of particles in two size ranges; $>\SI{0.5}{\um}$ and $>\SI{2.5}{\um}$.
 The small particles are detected down to 0.5 um.
 The large particles are detected down to 2.5 um.
-They output average number of particles per 0.01 cubic foot every minute.
-
+They output average number of particles per 0.01 cubic foot every minute for each size bin.
 To get the number of particles between 0.5 and 2.5 um, subtract the value for large particles from small particles.
+The measured concentration is displayed on a screen or through a serial output to which a computer can log data to a file.
 
 There is a study that said the above size range are misleading, the 0.5 um bin represent 2.5 um particles and 2.5 um bin represent 10 um particles. (link)[https://aqicn.org/experiments/what-is-the-dylos-monitor-actually-measuring/]
 
@@ -29,6 +31,9 @@ DC1100 have a bit higher sample rate (59 seconds) than DC1700 (60 seconds)
 Dylos DC1700
 ~~~~~~~~~~~~
 
+Dylos DC1700 is a cheap customer-grade air quality monitor, priced at \SI{425.00}{\$} and measures the number of particles in two size ranges; $>\SI{0.5}{\um}$ and $>\SI{2.5}{\um}$.
+The monitor output an average number of particles per 0.01 cubic foot every minute for each size range.
+The measured concentration is displayed on a screen or through a serial output to which a computer can log data to a file.
 The Dylos is battery powered which last for 6 hours and have a memory storage which store data for approximately whole week.
 
 Maintenance
