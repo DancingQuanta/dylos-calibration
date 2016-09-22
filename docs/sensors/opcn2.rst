@@ -1,10 +1,17 @@
 Alphasense OPC-N2
 =================
 
-Alphasense OPC-N2 is a optical particle counter.
+Alphasense OPC-N2 is a new OPC, having been released to the market in 2015, and is highly configurable.
+The Alphasense measures the particle concentration over a size range of \SI{0.38}{\um} to \SI{17.5}{\um} in 16 bins.
+The alphasense communicates with a computer via Serial Peripheral Interface (SPI) and allows an user to configure its bin boundaries, laser power and fan power.
+The sensor returns a histogram of number of particles counted in a sample period when polled, as well as measured sample flow rate, temperature, pressure and sample period.
+The sample period is the time between polling.
+The user have to compute the particle concentration by dividing the particle count by the product of sample flow rate and sample period.
+
 The OPC continuously count the particles into their bin sizes within a defined sampling period.
 The sensor also measures temperature, pressure, sample flow rate, PM1, PM2.5 and PM10.
 To obtain the particle number concentration, divide the particle bin values by the product of flow rate and sampling period.
+
 Please read the technical details carefully as it explains the limits of the sensor.
 
 Technical details
