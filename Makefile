@@ -9,7 +9,7 @@ FIG_SIZE := 0.29
 RAW := data/raw
 PROCESSED := data/processed
 INTERIM := data/interim
-IMGS := imgs
+IMGS := imgs/plots
 SENSORS := src/sensors/sensors.yaml
 SETTINGS := settings
 
