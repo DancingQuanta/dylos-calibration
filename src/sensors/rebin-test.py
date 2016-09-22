@@ -3,7 +3,6 @@
 
 import os
 import pandas as pd
-from rebin import *
 from src.modules.data import *
 from src.modules.analysis import *
 from grimm import rebinGrimm
