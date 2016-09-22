@@ -12,7 +12,10 @@ A custom Python script on the Raspberry Pi logs the measurements from the instru
 The calibration process involves running the nebuliser without a calibration particle solution so that clean filtered air is injected into the box which pushes the resident air out of the box.
 When the readings of the instruments reaches near zero particles, a solution of calibration particle of a chosen size is introduced to the nebuliser.
 The particles is allowed to populate the box for more than 30 minutes before removing the solution.
-The process repeats for each solution of particles of different sizes.
+This process repeats for each solution of particles of different sizes.
+
+To calibrate the Dylos the histogram of either the Grimm or Alphasense have to be rebinned to the bin sizes of the Dylos.
+The rebi
 
 Analysis
 
