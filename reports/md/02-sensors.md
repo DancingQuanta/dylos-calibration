@@ -17,6 +17,7 @@ The alphasense communicates with a computer via Serial Peripheral Interface (SIP
 The sensor returns a histogram of number of particles counted in a sample period when polled, as well as measured sample flow rate, temperature, pressure and sample period.
 The sample period is the time between polling.
 The user have to compute the particle concentration by dividing the particle count by the product of sample flow rate and sample period.
+
 The properties of the aerosol measuring instruments is listed in +@tbl:properties.
 
 +-------------------------+------------------------------+----------------------+-----------------------+
