@@ -318,7 +318,7 @@ if __name__ == '__main__':
     # Create some directories if they do not exist
 
     # Base imgs directory
-    base_imgs_dir = os.path.join(project_dir, "imgs", name)
+    base_imgs_dir = os.path.join(project_dir, "imgs", "plots", name)
     if not os.path.isdir(base_imgs_dir):
         os.makedirs(base_imgs_dir)
 
