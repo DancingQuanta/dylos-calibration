@@ -13,7 +13,7 @@ import logging
 
 logging.basicConfig(filename='log',
                     filemode='a',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
                     level=logging.DEBUG)
 
@@ -49,19 +49,17 @@ def histogram(df, bounds, ax):
 def set_ax(ax, x_title, y_title):
     ax.xaxis.set_visible(False)
     if ax.is_first_col():
-        ax.ylabel(r'Frequency per $\log$')
         ax.annotate(y_title, xy=(0, 0.5),
                     xycoords=('axes fraction', 'axes fraction'),
                     xytext=(10, 0),
                     textcoords='offset points',
                     size=14, ha='center', va='bottom')
-    if ax.is_last_col():
-        ax.ylabel(r'Frequency per $\log \mu$')
+    # if ax.is_last_col():
+
     if ax.is_first_row():
         ax.set_title(x_title)
     if ax.is_last_row():
         ax.xaxis.set_ticks_position('bottom')
-        ax.xlabel(r'$\mathbf{Diameter}$ / $\mu$')
 
 
 if __name__ == '__main__':
@@ -129,5 +127,9 @@ if __name__ == '__main__':
             set_ax(ax, sensor_name, condition_name)
             k += 1
 
+    x_label = r'$\mathbf{Diameter}$ / $\mu$'
+    y_label = r'Frequency per $\log D$'
+    fig.text(0.5, 0.04, x_label, ha='center', va='center')
+    fig.text(0.06, 0.5, y_label, ha='center', va='center', rotation='vertical')
     saveplot(output_file, fig)
     plt.close()
