@@ -20,11 +20,13 @@ INTERIM_DATA := $(shell find $(INTERIM)/ -name '*.csv')
 PLOT_DATA := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-plot.png,$(INTERIM_DATA))
 HIST_PLOT := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-hist.png,$(INTERIM_DATA))
 HIST_STATS := $(patsubst $(INTERIM)/%.csv,$(PROCESSED)/%-stats.tex,$(INTERIM_DATA))
+HIST_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-hist-mat.png,$(INTERIM_SETTINGS))
 
 PROCESS_SCRIPT := src/data/process.py
 CALIBRATION_SCRIPT := src/data/calibration.py
 PLOT_SCRIPT := src/visualisation/plot.py
 HIST_SCRIPT := src/visualisation/hist.py
+HIST_MAT_SCRIPT := src/visualisation/hist_matrix.py
 
 FIGURES := $(shell find $(IMGS)/ -name '*.pgf')
 
@@ -48,6 +50,8 @@ calibrate: $(INTERIM_SETTINGS)
 plot: $(PLOT_DATA)
 
 hist: $(HIST_PLOT) $(HIST_STATS)
+
+histmat: $(HIST_MAT)
 
 figures: $(TIKZPDF)
 
@@ -75,6 +79,9 @@ $(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 
 $(IMGS)/%-hist.png $(PROCESSED)/%-hist.csv: $(INTERIM)/%.csv $(HIST_SCRIPT)
 	python $(HIST_SCRIPT) $< -p $(IMGS)/$*-hist.png -s $(PROCESSED)/$*-hist.csv -f $(FIG_SIZE)
+
+$(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(DATA) $(HIST_MAT_SCRIPT)
+	python $(HIST_MAT_SCRIPT) $< -o $@ -f 0.99
 
 # Generate PDF from TIKZ
 %.pdf: %.tikz $(FIGURES)
