@@ -6,6 +6,7 @@ sensors:
     path: "dylos-alpha/logs/prep/split-Alpha/Alpha"
     type: opcn2
     prunebins:
+sensor_order: ['dylos','alpha']
 output:
   author: Andrew Tolmie
   title: Aerosol calibration of Dylos and Alphasense OPCN2

@@ -9,6 +9,7 @@ sensors:
     timeshift: '-00:07:00'
     resample: minute
     prunebins:
+sensor_order: ['dylos', 'grimm']
 calibration:
   calibratee: dylos
   calibrater: grimm
