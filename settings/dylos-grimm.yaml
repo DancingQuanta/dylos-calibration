@@ -17,7 +17,7 @@ output:
   report:
     author: Andrew Tolmie
     title: Aerosol calibration of Dylos and Grimm
-  unit: 'count per litre'
+  unit: 'count per cubic cm'
 exp:
   order: ["0.2", "0.3", "0.4", "0.8", "1", "2"]
   conditions:
