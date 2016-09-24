@@ -29,19 +29,18 @@ def histogram(df, bounds, ax):
         path : str
             Path for saved plots
     """
-    # Initialise new series
-    columns = ['Counts', "dN/logD"]
-    df1 = pd.DataFrame(columns=columns)
+    # Bin boundaries
+    lower = bounds[:-1]
+    upper = bounds[1:]
 
-    # Take a mean of the input dataframe which becomes a series with column
-    df1['Counts'] = df.mean(axis=0)
-    df1["dN/logD"] = df1["Counts"] / np.log10(bounds[1:]) - np.log10(bounds[:-1])
+    # Take a mean of the input dataframe to form a histogram
+    counts = df.mean(axis=0).values
+    y = counts / (np.log10(upper) - np.log10(lower))
 
     # Plot lognormal
-    x1 = bounds[:-1]  # left edge
-    x2 = bounds[1:]  # right edge
+    x1 = lower  # left edge
+    x2 = upper  # right edge
     w = np.array(x2)-np.array(x1)  # variable width
-    y = df1["dN/logD"].tolist()
     ax.bar(x1, y, width=w)
     ax.set_xscale('log')
 
@@ -107,6 +106,7 @@ if __name__ == '__main__':
         condition = conditions[exp]
         for sensor in sensor_order:
             # Get name
+            sensor_name = 'test'
             sensor_name = sensors[sensor]['name']
             condition_name = condition
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
             histogram(df, bounds, ax)
 
             # Plot
-            set_ax(ax, sensor_name, condition_name)
+            # set_ax(ax, sensor_name, condition_name)
             k += 1
 
     x_label = r'$\mathbf{Diameter}$ / $\mu$'
