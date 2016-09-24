@@ -49,7 +49,7 @@ calibrate: $(INTERIM_SETTINGS)
 
 plot: $(PLOT_DATA)
 
-hist: $(HIST_PLOT) $(HIST_STATS)
+hist: $(HIST_PLOT)
 
 histmat: $(HIST_MAT)
 
