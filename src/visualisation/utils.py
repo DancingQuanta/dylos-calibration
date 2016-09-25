@@ -31,6 +31,12 @@ params = {                      # setup matplotlib to use latex for output
 matplotlib.rcParams.update(params)
 
 
+def date_handler(obj):
+    # Handles datetime object before json serialising it
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+
+
 def figsize(scale):
     fig_width_pt = 483.69687                          # Get this from LaTeX using \the\textwidth
     inches_per_pt = 1.0 / 72.27                       # Convert pt to inch
