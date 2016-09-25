@@ -9,8 +9,7 @@ import json
 import pandas as pd
 from pint import UnitRegistry
 import yaml
-from collections import defaultdict
-from utils import gen_bin_labels
+from utils import *
 
 
 def date_handler(obj):
@@ -58,22 +57,6 @@ def load_data(path, bins, string):
 
     # Return the data
     return df, bins['bounds']
-
-
-def writeData(df, path, filename):
-    """Write Pandas.DataFrame to csv file
-    Args:
-        df: Pandas.DataFrame
-        path: string
-            Path to location of file
-        filename: str
-            Name of the file
-    Returns: None
-    """
-    filename = filename + ".csv"
-    path = os.path.join(path, filename)
-    df.to_csv(path)
-    return path
 
 
 def realCounts(data):
@@ -201,7 +184,9 @@ if __name__ == '__main__':
             logging.debug(debug)
 
         # Set seconds to zero
+        index_label = data.index.name
         data.index = data.index.values.astype('<M8[m]')
+        data.index.name = index_label
 
         # Units of data
         # Scaling and unit conversion of particle concentration

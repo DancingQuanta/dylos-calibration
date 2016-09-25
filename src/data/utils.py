@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Utility functions for data scripts
+
+import os
 
 def gen_bin_labels(binsList, string):
     """ Prepend a string to a list of bins boundaries to label each bin.
@@ -41,3 +44,23 @@ def gen_bin_labels(binsList, string):
     # Return dict of bin labels and bin value lists
     bins = {'columns': columns, 'bounds': newBinsList, 'index': chosen_index}
     return bins
+
+def writeData(df, path, filename):
+    """Write Pandas.DataFrame to csv file
+    Args:
+        df: Pandas.DataFrame
+        path: string
+            Path to location of file
+        filename: str
+            Name of the file
+    Returns: None
+    """
+    filename = filename + ".csv"
+    path = os.path.join(path, filename)
+
+    # df.to_csv(path, header=True, index=True, index_label=df.index.name)
+    df.to_csv(path)
+    return path
+
+
+
