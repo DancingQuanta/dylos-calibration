@@ -78,7 +78,7 @@ if __name__ == '__main__':
     ncols=len(sensor_order)
 
     # Fig size
-    fig_width = 2.2
+    fig_width = 2
     fig_height = 1.6
     fig_size = [(fig_width * ncols), (fig_height * nrows)]
 
@@ -92,7 +92,6 @@ if __name__ == '__main__':
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
 
-    k = 0
     plt.annotate(x_label, xy=(0.5, 0),
                 xycoords=('figure fraction', 'figure fraction'),
                 xytext=(0, 6),
@@ -104,6 +103,9 @@ if __name__ == '__main__':
                 textcoords='offset points',
                 ha='center', va='center',
                 rotation='vertical')
+
+    ax = plt.subplot(gs[0, 0])
+    ax.set_title("Particle size")
 
     for i, sensor in enumerate(sensor_order):
         for j, exp in enumerate(exp_order):
@@ -134,14 +136,13 @@ if __name__ == '__main__':
                             xycoords=('axes fraction', 'axes fraction'),
                             xytext=(0, 0),
                             textcoords='offset points',
-                            ha='center', va='bottom')
+                            size=11, ha='center', va='bottom')
                 ax1.axis('off')
             if j == 0:
                 ax.set_title(x_title)
 
             if j == nrows:
                 ax.xaxis.set_ticks_position('bottom')
-            k += 1
 
     kwargs = {"bbox_inches": "tight"}
     settings['plots'] = {}
