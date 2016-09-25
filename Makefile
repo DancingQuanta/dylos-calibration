@@ -15,8 +15,9 @@ SETTINGS := settings
 
 DATA := $(shell find $(RAW)/ -name '*.log')
 YAML := $(shell find $(SETTINGS)/ -name '*.yaml')
-INTERIM_SETTINGS := $(addprefix $(INTERIM)/,$(notdir $(patsubst %.yaml,%.json,$(YAML))))
+INTERIM_SETTINGS := $(patsubst $(SETTINGS)/%.yaml,$(INTERIM)/%.json,$(YAML))
 INTERIM_DATA := $(shell find $(INTERIM)/ -name '*.csv')
+CALIBRATE_FLAGS := $(patsubst $(INTERIM)/%.json,.calibrated-%,$(INTERIM_SETTINGS))
 PLOT_DATA := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-plot.png,$(INTERIM_DATA))
 HIST_PLOT := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-hist.png,$(INTERIM_DATA))
 HIST_STATS := $(patsubst $(INTERIM)/%.csv,$(PROCESSED)/%-stats.tex,$(INTERIM_DATA))
@@ -47,7 +48,7 @@ docs: requirements
 
 data: $(INTERIM_SETTINGS)
 
-calibrate: $(INTERIM_SETTINGS)
+calibrate: $(CALIBRATE_FLAGS)
 
 plot: $(PLOT_DATA)
 
@@ -73,8 +74,9 @@ lint:
 $(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
 	python $(PROCESS_SCRIPT) $< $(SENSORS) $(RAW) -o $@
 
-$(INTERIM)/%.json: $(INTERIM)/%.json $(DATA) $(CALIBRATION_SCRIPT)
-	python $(CALIBRATION_SCRIPT) $< -o $@ 
+.calibrated-%: $(INTERIM)/%.json $(CALIBRATION_SCRIPT)
+	python $(CALIBRATION_SCRIPT) $<
+	touch .calibrated-$*
 
 $(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@ -f $(FIG_SIZE)

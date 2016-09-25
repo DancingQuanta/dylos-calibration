@@ -3,12 +3,11 @@
 
 import os
 import argparse
-import logging
 import json
+import numpy as np
 import pandas as pd
-from pint import UnitRegistry
-import yaml
-from utils import gen_bin_labels
+from rebin import *
+from utils import *
 
 
 def load_data(path):
@@ -16,7 +15,7 @@ def load_data(path):
     """
     df = pd.read_csv(path,
                      parse_dates=[0],
-                     index_col='Datetime',
+                     index_col=0,
                      infer_datetime_format=True)
     return df
 
@@ -36,119 +35,117 @@ def rebin(df, bins1, bins2):
             This list will be used to rebin the 'data' in bins1
     Return:
         df: Pandas.DataFrame
-            Output DataFrame with newly changed bins bounbaries
+            Output DataFrame with newly changed bins boundaries
     """
 
     # Get column labels
     columns1 = df.columns
     # What sensor it is
     sensorName = columns1[0].split('-')[0]
+    # Old bins
+    bounds1 = bins1
 
-
-    bins2 = generateBinLabels(bins2, label)
+    # Generate new bins labels
+    bins2 = gen_bin_labels(bins2, sensorName)
+    bounds2 = bins2['bounds']
+    columns2 = bins2['columns']
 
     # Ensure the lower boundary of lowest bin and upper boundary of
     # highest bin of new bin list is within the limits of old bin list
-    if bins2['bounds'][0] < bins1['bounds'][0]:
+    if bounds2[0] < bounds1[0]:
         msg = ("The lower boundary of new bottommost bin (%s)"
                "is lower then the lower boundary of old mottommost"
-               "bin (%s)" % (bins2['bounds'][0], bins1['bounds'][0]))
+               "bin (%s)" % (bounds2[0], bounds1[0]))
         raise ValueError(msg)
-    if bins2['bounds'][-1] > bins1['bounds'][-1]:
+    if bounds2[-1] > bounds1[-1]:
         msg = ("The upper boundary of new topmost bin (%s)"
                "is higher then the upper boundary of old topmost"
-               "bin (%s)" % (bins2['bounds'][-1], bins1['bounds'][-1]))
+               "bin (%s)" % (bounds2[-1], bounds1[-1]))
         raise ValueError(msg)
 
     # Assign bin boundaries
-    x1 = np.array(bins1['bounds'])
+    x1 = np.array(bounds1)
+    x2 = np.array(bounds2)
+
+    # Check if input data is a series or dataframe
+    if isinstance(df, pd.Series):
+        y1 = df.values
+        y2 = rebin_piecewise_constant(x1, y1, x2)
+        # Initialise new dataframe
+        df2 = pd.Series(y2, index=columns2)
+    elif isinstance(df, pd.DataFrame):
+        index = df.index
+        # Initialise new dataframe
+        df2 = pd.DataFrame(0, index=index, columns=columns2)
+        for ix in index:
+            y1 = df.loc[ix].values
+            y2 = rebin_piecewise_constant(x1, y1, x2)
+            df2.loc[ix] = y2
+
+    return df2
+
 
 if __name__ == '__main__':
     # Get filenames to work with
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("settings", help="Settings yaml file")
-    parser.add_argument("sensors", help="Sensors defintions yaml file")
-    parser.add_argument("rawdatadir", help="Raw Data directory")
-    parser.add_argument("-o", "--output",
-                        help="Directs the output to a name of your choice")
 
     options = parser.parse_args()
-    settingsFile = options.settings    # Settings file
-    outputFile = options.output        # Output directory
+    settings_file = options.settings    # Settings file
 
-    name = os.path.basename(settingsFile)
-    name = os.path.splitext(name)[0]
-
-    # Create output directory
-    filename = os.path.basename(outputFile)
-    name = os.path.splitext(filename)[0]
-    path = os.path.abspath(os.path.dirname(outputFile))
-    output_dir = os.path.join(path, name)
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
-
-    # Initialise pint's UnitRegistry
-    ureg = UnitRegistry()
-
-    # Load settings yaml file
-    with open(settingsFile) as handle:
-        settings = yaml.load(handle)
+    # Load settings json file
+    with open(settings_file) as handle:
+        settings = json.load(handle)
 
     # Load info
-    calibration = settings['calibration']
+    calibrater = settings['calibration']['calibrater']
+    calibratee = settings['calibration']['calibratee']
     sensors = settings['sensors']
-    exps = setttings['exp']
+
+    # Get bin boundaries
+    calibrater_bins = sensors[calibrater]['bins']
+    calibratee_bins = sensors[calibratee]['bins']
+
+    # Name of rebinned dataset
+    name = "rebinned-" + calibrater
+
+    # Append to sensor order
+    if name not in settings['sensor_order']:
+        settings['sensor_order'] += [name]
+
+    # Give details of rebinned dataset
+    sensors[name] = {}
+    sensors[name]['bins'] = calibratee_bins
+    sensors[name]['name'] = "Rebinned %s" % (sensors[calibrater]['name'])
+
+    settings['sensors'] = sensors
 
     # Conditions
-    order = exps['order']
-    conditions = exps['conditions']
-
-    # Get sensor details
-    calibrater = sensors[calibration['calibrater']]
-    calibratee = sensors[calibration['calibratee']]
+    order = settings['exp']['order']
+    conditions = settings['exp']['conditions']
 
     for exp in order:
         condition = conditions[exp]
 
         # Load data path
-        calibrater_path = condition['sensor'][calibration['calibrater']]
-        calibratee_path = condition['sensor'][calibration['calibratee']]
+        calibrater_path = condition['sensor'][calibrater]['data']
+        calibratee_path = condition['sensor'][calibratee]['data']
 
         # Load data
         calibrater_data = load_data(calibrater_path)
         calibratee_data = load_data(calibratee_path)
 
-        # Get bin boundaries
-        calibrater_bins = cablirater['bins']
-        calibratee_bins = cabliratee['bins']
-
-
-
-        # Bin boundaries of final set of bins
-        finalBins = calibratee['bounds']
-
         # rebin calibrater dataset to match calibratee dataset
-        rebinned = rebin(calibrater, finalBins)
-        name = "rebinned-" + sensors['calibrater']['id']
-        writeData(rebinned['data'], base_interim_data_dir, name)
-        debug = ("Start: %s, end: %s" % (rebinned['data'].index[0],
-                                         rebinned['data'].index[-1]))
-        logging.debug(debug)
-        sensors['rebinned'] = {'id': name, 'bins': rebinned}
-
-
-        # Write selected data to file
-        path = writeData(sample, path, sensor)
-
-        condition['sensor'][sensor] = {'data': path}
-
+        rebinned = rebin(calibrater_data, calibrater_bins, calibratee_bins)
+        dir = os.path.dirname(calibrater_path)
+        path = writeData(rebinned, dir, name)
+        condition['sensor'][name] = {'data': path}
         conditions[exp] = condition
 
-    exps['conditions'] = conditions
-
+    settings['exp']['conditions'] = conditions 
 
     # Output processed data
     dump = json.dumps(settings, default=date_handler,
                       sort_keys=True, indent=4).replace("\\\\", "/")
-    with open(outputFile, 'w') as outfile:
-            outfile.write(dump)
+    with open(settings_file, 'w') as handle:
+            handle.write(dump)
