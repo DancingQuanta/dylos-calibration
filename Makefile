@@ -81,7 +81,7 @@ $(IMGS)/%-hist.png $(PROCESSED)/%-hist.csv: $(INTERIM)/%.csv $(HIST_SCRIPT)
 	python $(HIST_SCRIPT) $< -p $(IMGS)/$*-hist.png -s $(PROCESSED)/$*-hist.csv -f $(FIG_SIZE)
 
 $(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(DATA) $(HIST_MAT_SCRIPT)
-	python $(HIST_MAT_SCRIPT) $< -o $@ -f 0.99
+	python $(HIST_MAT_SCRIPT) $< -o $@
 
 # Generate PDF from TIKZ
 %.pdf: %.tikz $(FIGURES)
