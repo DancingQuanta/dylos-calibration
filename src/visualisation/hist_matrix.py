@@ -83,7 +83,8 @@ if __name__ == '__main__':
     params = {"figure.figsize": fig_size}
     matplotlib.rcParams.update(params)
 
-    fig, axarr = plt.subplots(nrows=nrows, ncols=ncols)
+    # Create matrix with first columns for particles
+    fig, axarr = plt.subplots(nrows=nrows, ncols=(ncols + 1))
     axes = fig.axes
     # fig.subplots_adjust(hspace=0.05, wspace=0.05)
     x_label = r'Diameter / \si{\um}'
@@ -101,6 +102,7 @@ if __name__ == '__main__':
                 textcoords='offset points',
                 ha='center', va='center',
                 rotation='vertical')
+
     for i, sensor in enumerate(sensor_order):
         for j, exp in enumerate(exp_order):
             condition = conditions[exp]
@@ -117,7 +119,7 @@ if __name__ == '__main__':
             bounds = sensors[sensor]['bins']
 
             # Pick an axes
-            ax = axarr[j,i]
+            ax = axarr[j,i+1]
 
             # Histogram logdensity
             histogram(df, bounds, ax)
@@ -125,12 +127,12 @@ if __name__ == '__main__':
             # Setting labels
             ax.xaxis.set_visible(False)
             if i == 0:
-                ax.annotate(y_title, xy=(0, 0.5),
+                axarr[j,0].annotate(y_title, xy=(0.5, 0.5),
                             xycoords=('axes fraction', 'axes fraction'),
-                            xytext=(-40, 0),
+                            xytext=(0, 0),
                             textcoords='offset points',
-                            size=12, ha='center', va='bottom')
-
+                            ha='center', va='bottom')
+                axarr[j,0].axis('off')
             if j == 0:
                 ax.set_title(x_title)
 
