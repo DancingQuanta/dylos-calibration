@@ -139,11 +139,10 @@ if __name__ == '__main__':
             k += 1
 
     kwargs = {"bbox_inches": "tight"}
-    saveplot(output_file, fig, **kwargs)
+    settings['plots'] = {}
+    settings['plots']['hist-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
     # Dump the plot path to json
-    settings['plots'] = {}
-    settings['plots']['hist-mat'] = output_file
     dump = json.dumps(settings, default=date_handler,
                      sort_keys=True, indent=4).replace("\\\\", "/")
     with open(settings_file, 'w') as handle:

@@ -22,7 +22,7 @@ HIST_PLOT := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-hist.png,$(INTERIM_DATA))
 HIST_STATS := $(patsubst $(INTERIM)/%.csv,$(PROCESSED)/%-stats.tex,$(INTERIM_DATA))
 HIST_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-hist-mat.png,$(INTERIM_SETTINGS))
 HIST_MAT_PDF := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%-hist-mat.pdf,$(INTERIM_SETTINGS))
-
+HIST_MAT_TEMPLATE := templates/hist_mat.tpl
 PROCESS_SCRIPT := src/data/process.py
 CALIBRATION_SCRIPT := src/data/calibration.py
 PLOT_SCRIPT := src/visualisation/plot.py
@@ -53,7 +53,7 @@ plot: $(PLOT_DATA)
 
 hist: $(HIST_PLOT)
 
-histmat: $(HIST_MAT)
+histmat: $(HIST_MAT_PDF)
 
 figures: $(TIKZPDF)
 
