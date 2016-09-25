@@ -5,6 +5,7 @@ import os
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import pandas as pd
 import argparse
 import json
@@ -84,8 +85,8 @@ if __name__ == '__main__':
     matplotlib.rcParams.update(params)
 
     # Create matrix with first columns for particles
-    fig, axarr = plt.subplots(nrows=nrows, ncols=(ncols + 1))
-    axes = fig.axes
+    fig = plt.figure(figsize=fig_size)
+    gs = gridspec.GridSpec((nrows*2),(ncols*2 + 1))
     # fig.subplots_adjust(hspace=0.05, wspace=0.05)
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
@@ -119,7 +120,7 @@ if __name__ == '__main__':
             bounds = sensors[sensor]['bins']
 
             # Pick an axes
-            ax = axarr[j,i+1]
+            ax = plt.subplot(gs[j, i+1:i+2])
 
             # Histogram logdensity
             histogram(df, bounds, ax)
@@ -127,12 +128,13 @@ if __name__ == '__main__':
             # Setting labels
             ax.xaxis.set_visible(False)
             if i == 0:
-                axarr[j,0].annotate(y_title, xy=(0.5, 0.5),
+                ax1 = plt.subplot(gs[j, 0])
+                ax1.annotate(y_title, xy=(0.5, 0.5),
                             xycoords=('axes fraction', 'axes fraction'),
                             xytext=(0, 0),
                             textcoords='offset points',
                             ha='center', va='bottom')
-                axarr[j,0].axis('off')
+                ax1.axis('off')
             if j == 0:
                 ax.set_title(x_title)
 
