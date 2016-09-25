@@ -16,8 +16,8 @@ params = {                      # setup matplotlib to use latex for output
     "font.serif": [],                   # blank entries should cause plots to inherit fonts from the document
     "font.sans-serif": [],
     "font.monospace": [],
-    "axes.labelsize": 10,               # LaTeX default is 10pt font.
-    'font.size': 10,
+    "axes.labelsize": 9,               # LaTeX default is 10pt font.
+    'font.size': 9,
     "legend.fontsize": 8,               # Make the legend/label fonts a little smaller
     "xtick.labelsize": 8,
     "ytick.labelsize": 8,
