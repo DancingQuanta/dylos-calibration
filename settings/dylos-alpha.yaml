@@ -7,6 +7,9 @@ sensors:
     type: opcn2
     prunebins:
 sensor_order: ['dylos','alpha']
+calibration:
+  calibratee: dylos
+  calibrater: alpha
 output:
   author: Andrew Tolmie
   title: Aerosol calibration of Dylos and Alphasense OPCN2
