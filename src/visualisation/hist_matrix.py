@@ -81,12 +81,13 @@ if __name__ == '__main__':
     fig_width = 2.2
     fig_height = 1.6
     fig_size = [(fig_width * ncols), (fig_height * nrows)]
-    params = {"figure.figsize": fig_size}
-    matplotlib.rcParams.update(params)
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
-    gs = gridspec.GridSpec((nrows*2),(ncols*2 + 1))
+    # gs = gridspec.GridSpec((nrows*2),(ncols*2 + 1))
+    width_ratios = [1] + ncols * [2]
+    gs = gridspec.GridSpec(nrows, (ncols + 1),
+                           width_ratios=width_ratios)
     # fig.subplots_adjust(hspace=0.05, wspace=0.05)
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
@@ -120,7 +121,7 @@ if __name__ == '__main__':
             bounds = sensors[sensor]['bins']
 
             # Pick an axes
-            ax = plt.subplot(gs[j, i+1:i+2])
+            ax = plt.subplot(gs[j, i+1])
 
             # Histogram logdensity
             histogram(df, bounds, ax)
