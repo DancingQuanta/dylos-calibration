@@ -113,10 +113,14 @@ if __name__ == '__main__':
     if name not in settings['sensor_order']:
         settings['sensor_order'] += [name]
 
+    # Append to calibration
+    if 'rebinned' not in settings['calibration']:
+        settings['calibration']['rebinned'] = name
+
     # Give details of rebinned dataset
     sensors[name] = {}
     sensors[name]['bins'] = calibratee_bins
-    sensors[name]['name'] = "Rebinned %s" % (sensors[calibrater]['name'])
+    sensors[name]['name'] = "Rebinned\n%s" % (sensors[calibrater]['name'])
 
     settings['sensors'] = sensors
 
