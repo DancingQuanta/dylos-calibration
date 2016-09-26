@@ -84,7 +84,6 @@ if __name__ == '__main__':
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
-    # gs = gridspec.GridSpec((nrows*2),(ncols*2 + 1))
     width_ratios = [1] + ncols * [2]
     gs = gridspec.GridSpec(nrows, (ncols + 1),
                            width_ratios=width_ratios)
@@ -92,20 +91,15 @@ if __name__ == '__main__':
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
 
-    plt.annotate(x_label, xy=(0.5, 0),
-                xycoords=('figure fraction', 'figure fraction'),
-                xytext=(0, 6),
-                textcoords='offset points',
-                ha='center', va='center')
-    plt.annotate(y_label, xy=(0, 0.5),
-                xycoords=('figure fraction', 'figure fraction'),
+    # First column
+    ax = plt.subplot(gs[0, 0])
+    ax.set_title("Particle size")
+    ax.annotate(y_label, xy=(1, 0.5),
+                xycoords=('axes fraction', 'figure fraction'),
                 xytext=(10, 0),
                 textcoords='offset points',
                 ha='center', va='center',
                 rotation='vertical')
-
-    ax = plt.subplot(gs[0, 0])
-    ax.set_title("Particle size")
 
     for i, sensor in enumerate(sensor_order):
         for j, exp in enumerate(exp_order):
@@ -130,6 +124,7 @@ if __name__ == '__main__':
 
             # Setting labels
             ax.xaxis.set_visible(False)
+            # First columns
             if i == 0:
                 ax1 = plt.subplot(gs[j, 0])
                 ax1.annotate(y_title, xy=(0.5, 0.5),
@@ -138,11 +133,23 @@ if __name__ == '__main__':
                             textcoords='offset points',
                             size=11, ha='center', va='bottom')
                 ax1.axis('off')
+
+            # First row
             if j == 0:
                 ax.set_title(x_title)
 
-            if j == nrows:
+            # Last row
+            if j == (nrows-1):
                 ax.xaxis.set_ticks_position('bottom')
+                ax.xaxis.set_visible(True)
+                if i == 1:
+                    ax.set_xlabel(x_label)
+                    # ax.annotate(x_label, xy=(0.5, 0),
+                                # xycoords=('axes fraction', 'axes fraction'),
+                                # xytext=(0, 6),
+                                # textcoords='offset points',
+                                # ha='center', va='center')
+
 
     kwargs = {"bbox_inches": "tight"}
     settings['plots'] = {}
