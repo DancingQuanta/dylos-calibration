@@ -8,12 +8,6 @@ import pandas as pd
 import argparse
 from utils import *
 
-def index_mins(df):
-    period = (df.index - df.index[0]).astype('timedelta64')
-    mins = period.total_seconds() / 60
-    df.index = mins
-    return df
-
 
 def plot(df, path):
     # Change the index of df to minutes

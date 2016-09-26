@@ -52,6 +52,7 @@ def load_data(path):
     """
     df = pd.read_csv(path,
                      parse_dates=[0],
+                     index_col=0,
                      infer_datetime_format=True)
     return df
 
@@ -157,4 +158,40 @@ def pruneBins(df):
 
     # Drop columns using zeroColumns
     df = df.drop(df.columns[zeroColumns], axis=1)
+    return df
+
+def concat(df1, df2):
+    """Concatenate two Pandas.DataFrames together.
+    The first dataframe's index will be used to set the index of second if the
+    length of the indexes are equal.
+    Different length dataframes can be concatanced together, where the shorted
+    index is used.
+    """
+    if len(df1) == len(df2):
+        print("Same")
+        df2.index = df1.index
+        df = df1.join(df2)
+    elif len(df1) > len(df2):
+        print("df1 big")
+        start = df2.index[0]
+        end = df2.index[-1]
+        df3 = df1.loc[start:end]
+        df = df3.join(df2)
+    elif len(df1) < len(df2):
+        print("df2 big")
+        start = df1.index[0]
+        end = df1.index[-1]
+        df3 = df2.loc[start:end]
+        df = df1.join(df3)
+    else:
+        error = "Something not right!"
+        print(error)
+        sys.exit(2)
+    return df
+
+
+def index_mins(df):
+    period = df.index - df.index[0]
+    mins = period.total_seconds() / 60
+    df.index = mins
     return df
