@@ -86,8 +86,8 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=fig_size)
     width_ratios = [1] + ncols * [2]
     gs = gridspec.GridSpec(nrows, (ncols + 1),
-                           width_ratios=width_ratios)
-    # fig.subplots_adjust(hspace=0.05, wspace=0.05)
+                           width_ratios=width_ratios,
+                           wspace=0.5, hspace=0.10)
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
 
@@ -105,7 +105,6 @@ if __name__ == '__main__':
         for j, exp in enumerate(exp_order):
             condition = conditions[exp]
             # Get name
-            sensor_name = 'test'
             x_title = sensors[sensor]['name']
             y_title = r"\SI{%s}{\um}" % (exp)
 
