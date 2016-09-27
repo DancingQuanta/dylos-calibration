@@ -30,12 +30,17 @@ HIST_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-hist-mat.png,$(INTERIM_SETTIN
 HIST_MAT_PDF := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%-hist-mat.pdf,$(INTERIM_SETTINGS))
 HIST_MAT_TEMPLATE := templates/hist_mat.tpl
 
+CALI_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-cali-mat.png,$(INTERIM_SETTINGS))
+CALI_MAT_PDF := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%-cali-mat.pdf,$(INTERIM_SETTINGS))
+CALI_MAT_TEMPLATE := templates/cali_mat.tpl
+
 PROCESS_SCRIPT := src/data/process.py
 REBIN_SCRIPT := src/data/rebin_data.py
 PLOT_SCRIPT := src/visualisation/plot.py
 PLOT_MAT_SCRIPT := src/visualisation/plot_matrix.py
 HIST_SCRIPT := src/visualisation/hist.py
 HIST_MAT_SCRIPT := src/visualisation/hist_matrix.py
+CALI_MAT_SCRIPT := src/visualisation/calibration.py
 GEN_SCRIPT := src/docs/gen.py
 
 FIGURES := $(shell find $(IMGS)/ -name '*.pgf')
@@ -64,6 +69,8 @@ plotmat: $(PLOT_MAT_PDF)
 hist: $(HIST_PLOT)
 
 histmat: $(HIST_MAT_PDF)
+
+calibrate: $(CALI_MAT_PDF)
 
 figures: $(TIKZPDF)
 
@@ -106,6 +113,13 @@ $(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(REBINNED_FLAGS) $(HIST_MAT_SCRIPT)
 
 $(PROCESSED)/%-hist-mat.tex: $(INTERIM)/%.json $(HIST_MAT_TEMPLATE) $(HIST_MAT)
 	python $(GEN_SCRIPT) $(HIST_MAT_TEMPLATE) $< $@ 
+
+# Calibration
+$(IMGS)/%-cali-mat.png: $(INTERIM)/%.json $(REBINNED_FLAGS) $(CALI_MAT_SCRIPT)
+	python $(CALI_MAT_SCRIPT) $< -o $@
+
+$(PROCESSED)/%-cali-mat.tex: $(INTERIM)/%.json $(CALI_MAT_TEMPLATE) $(CALI_MAT)
+	python $(GEN_SCRIPT) $(CALI_MAT_TEMPLATE) $< $@ 
 
 # Generate PDF from TIKZ
 %.pdf: %.tikz $(FIGURES)
