@@ -55,14 +55,14 @@ if __name__ == '__main__':
     exp_order = exps['order']
     conditions = exps['conditions']
 
+    # Matrix dimension
+    nrows=len(exp_order)
+    ncols=2
+
     # Fig size
     fig_width = 3
     fig_height = 1.6
     fig_size = [(fig_width * ncols), (fig_height * nrows)]
-
-    # Matrix dimension
-    nrows=len(exp_order)
-    ncols=2
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
