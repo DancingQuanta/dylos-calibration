@@ -23,7 +23,7 @@ def plot(df, ax):
     df = index_mins(df)
 
     # Plot timeseries
-    df.plot(ax=ax)
+    df.plot(ax=ax, legend=False)
 
 
 if __name__ == '__main__':
@@ -55,21 +55,22 @@ if __name__ == '__main__':
     exp_order = exps['order']
     conditions = exps['conditions']
 
+    # Fig size
+    fig_width = 3
+    fig_height = 1.6
+    fig_size = [(fig_width * ncols), (fig_height * nrows)]
+
     # Matrix dimension
     nrows=len(exp_order)
     ncols=2
-
-    # Fig size
-    fig_width = 2
-    fig_height = 1.6
-    fig_size = [(fig_width * ncols), (fig_height * nrows)]
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
     width_ratios = [1] + ncols * [2]
     gs = gridspec.GridSpec(nrows, (ncols + 1),
-                           width_ratios=width_ratios,
-                           wspace=0.5, hspace=0.10)
+                           width_ratios=width_ratios)
+                           # wspace=0.5, hspace=0.10)
+
     x_label = r'Time / min'
     y_label = r'Particle counts'
 
@@ -89,13 +90,13 @@ if __name__ == '__main__':
         y_title = r"\SI{%s}{\um}" % (exp)
 
         # First column
-        ax = plt.subplot(gs[i, 0])
-        ax.annotate(y_title, xy=(0.5, 0.5),
+        ax1 = plt.subplot(gs[i, 0])
+        ax1.annotate(y_title, xy=(0.5, 0.5),
                     xycoords=('axes fraction', 'axes fraction'),
                     xytext=(0, 0),
                     textcoords='offset points',
                     size=11, ha='center', va='bottom')
-        ax.axis('off')
+        ax1.axis('off')
 
         # Second column
         # load calibrater data and plot it!
@@ -103,27 +104,27 @@ if __name__ == '__main__':
         df = load_data(data_path)
 
         # Pick an axes
-        ax = plt.subplot(gs[i, 1])
+        ax2 = plt.subplot(gs[i, 1])
 
         # Plot timeseries
-        plot(df, ax)
+        plot(df, ax2)
 
         # Third column
         # load calibratee and rebinned data and plot it!
         data_path = condition['sensor'][calibratee]['data']
         df = load_data(data_path)
-        print(df)
 
         data_path = condition['sensor'][rebinned]['data']
         df1 = load_data(data_path)
         df = concat(df,df1)
 
         # Pick an axes
-        ax = plt.subplot(gs[i, 2])
+        ax3 = plt.subplot(gs[i, 2])
 
         # Plot timeseries
-        plot(df)
+        plot(df, ax3)
 
+    fig.text(2/3, 0.00, x_label, ha='center', va='center')
 
     kwargs = {"bbox_inches": "tight"}
     settings['plots'] = {}
