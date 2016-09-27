@@ -91,7 +91,7 @@ $(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
 $(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@ -f $(FIG_SIZE)
 
-$(IMGS)/%-plot-mat.png: $(INTERIM)/%.json $(DATA) $(PLOT_MAT_SCRIPT)
+$(IMGS)/%-plot-mat.png: $(INTERIM)/%.json $(CALIBRATE_FLAGS) $(PLOT_MAT_SCRIPT)
 	python $(PLOT_MAT_SCRIPT) $< -o $@
 
 $(PROCESSED)/%-plot-mat.tex: $(INTERIM)/%.json $(PLOT_MAT_TEMPLATE) $(PLOT_MAT)
@@ -101,7 +101,7 @@ $(PROCESSED)/%-plot-mat.tex: $(INTERIM)/%.json $(PLOT_MAT_TEMPLATE) $(PLOT_MAT)
 $(IMGS)/%-hist.png $(PROCESSED)/%-hist.csv: $(INTERIM)/%.csv $(HIST_SCRIPT)
 	python $(HIST_SCRIPT) $< -p $(IMGS)/$*-hist.png -s $(PROCESSED)/$*-hist.csv -f $(FIG_SIZE)
 
-$(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(DATA) $(HIST_MAT_SCRIPT)
+$(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(CALIBRATE_FLAGS) $(HIST_MAT_SCRIPT)
 	python $(HIST_MAT_SCRIPT) $< -o $@
 
 $(PROCESSED)/%-hist-mat.tex: $(INTERIM)/%.json $(HIST_MAT_TEMPLATE) $(HIST_MAT)
