@@ -59,9 +59,11 @@ if __name__ == '__main__':
     with open(settings_file) as handle:
         settings = json.load(handle)
 
-    # Sensors
+    # Load sensor info
+    calibrater = settings['calibration']['calibrater']
+    calibratee = settings['calibration']['calibratee']
+    rebinned = settings['calibration']['rebinned']
     sensors = settings['sensors']
-    sensor_order = settings['sensor_order']
 
     # Experimental conditions
     exps = settings['exp']
@@ -72,7 +74,7 @@ if __name__ == '__main__':
 
     # Matrix dimension
     nrows=len(exp_order)
-    ncols=len(sensor_order)
+    ncols=3
 
     # Fig size
     fig_width = 2
@@ -85,6 +87,7 @@ if __name__ == '__main__':
     gs = gridspec.GridSpec(nrows, (ncols + 1),
                            width_ratios=width_ratios,
                            wspace=0.5, hspace=0.10)
+
     x_label = r'Diameter / \si{\um}'
     y_label = r'Frequency per $\log D$'
 
@@ -98,53 +101,87 @@ if __name__ == '__main__':
                 ha='center', va='center',
                 rotation='vertical')
 
-    for i, sensor in enumerate(sensor_order):
-        for j, exp in enumerate(exp_order):
-            condition = conditions[exp]
-            # Get name
-            x_title = sensors[sensor]['name']
-            y_title = r"\SI{%s}{\um}" % (exp)
+    for i, exp in enumerate(exp_order):
+        condition = conditions[exp]
+        # Get name
+        y_title = r"\SI{%s}{\um}" % (exp)
 
-            # load data
-            data_path = condition['sensor'][sensor]['data']
-            df = load_data(data_path)
+        # First column
+        ax1 = plt.subplot(gs[i, 0])
+        ax1.annotate(y_title, xy=(0.5, 0.5),
+                     xycoords=('axes fraction', 'axes fraction'),
+                     xytext=(0, 0),
+                     textcoords='offset points',
+                     size=11, ha='center', va='bottom')
+        ax1.axis('off')
 
-            # Get bins
-            bounds = sensors[sensor]['bins']
+        # Second column
+        # load calibratee data and plot it!
+        data_path = condition['sensor'][calibratee]['data']
+        df = load_data(data_path)
 
-            # Pick an axes
-            ax = plt.subplot(gs[j, i+1])
+        # Get bins
+        bounds = sensors[calibratee]['bins']
 
-            # Histogram logdensity
-            histogram(df, bounds, ax)
+        # Pick an axes
+        ax2 = plt.subplot(gs[i, 1])
 
-            # Setting labels
-            ax.xaxis.set_visible(False)
-            # First columns
-            if i == 0:
-                ax1 = plt.subplot(gs[j, 0])
-                ax1.annotate(y_title, xy=(0.5, 0.5),
-                            xycoords=('axes fraction', 'axes fraction'),
-                            xytext=(0, 0),
-                            textcoords='offset points',
-                            size=11, ha='center', va='bottom')
-                ax1.axis('off')
+        # Histogram logdensity
+        histogram(df, bounds, ax2)
+        ax2.xaxis.set_visible(False)
 
-            # First row
-            if j == 0:
-                ax.set_title(x_title)
+        # Third column
+        # load calibrater data and plot it!
+        data_path = condition['sensor'][calibrater]['data']
+        df = load_data(data_path)
 
-            # Last row
-            if j == (nrows-1):
-                ax.xaxis.set_ticks_position('bottom')
-                ax.xaxis.set_visible(True)
-                if i == 1:
-                    ax.set_xlabel(x_label)
-                    # ax.annotate(x_label, xy=(0.5, 0),
-                                # xycoords=('axes fraction', 'axes fraction'),
-                                # xytext=(0, 6),
-                                # textcoords='offset points',
-                                # ha='center', va='center')
+        # Get bins
+        bounds = sensors[calibrater]['bins']
+
+        # Pick an axes
+        ax3 = plt.subplot(gs[i, 2])
+
+        # Histogram logdensity
+        histogram(df, bounds, ax3)
+        ax3.xaxis.set_visible(False)
+
+        # Fourth column
+        # load rebinned calibrater data and plot it!
+        data_path = condition['sensor'][rebinned]['data']
+        df = load_data(data_path)
+
+        # Get bins
+        bounds = sensors[rebinned]['bins']
+
+        # Pick an axes
+        ax4 = plt.subplot(gs[i, 3])
+
+        # Histogram logdensity
+        histogram(df, bounds, ax4)
+        ax4.xaxis.set_visible(False)
+
+        # First row
+        if i == 0:
+            ax2.set_title(sensors[calibratee]['name'])
+            ax3.set_title(sensors[calibrater]['name'])
+            ax4.set_title(sensors[rebinned]['name'])
+
+        # Last row
+        if i == (nrows-1):
+            ax2.xaxis.set_ticks_position('bottom')
+            ax2.xaxis.set_visible(True)
+            ax3.xaxis.set_ticks_position('bottom')
+            ax3.xaxis.set_visible(True)
+            ax4.xaxis.set_ticks_position('bottom')
+            ax4.xaxis.set_visible(True)
+
+            # Third column
+            ax3.set_xlabel(x_label)
+            # ax.annotate(x_label, xy=(0.5, 0),
+                        # xycoords=('axes fraction', 'axes fraction'),
+                        # xytext=(0, 6),
+                        # textcoords='offset points',
+                        # ha='center', va='center')
 
 
     kwargs = {"bbox_inches": "tight"}
