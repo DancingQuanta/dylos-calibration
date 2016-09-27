@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-import pandas as pd
 import argparse
 import json
 from utils import *
@@ -18,12 +14,14 @@ logging.basicConfig(filename='log',
                     datefmt='%H:%M:%S',
                     level=logging.DEBUG)
 
+
 def plot(df, ax):
     # Change the index of df to minutes
     df = index_mins(df)
 
     # Plot timeseries
     df.plot(ax=ax, legend=False)
+    ax.set_color_cycle(None)
 
 
 if __name__ == '__main__':
@@ -56,8 +54,8 @@ if __name__ == '__main__':
     conditions = exps['conditions']
 
     # Matrix dimension
-    nrows=len(exp_order)
-    ncols=2
+    nrows = len(exp_order)
+    ncols = 2
 
     # Fig size
     fig_width = 3
@@ -68,8 +66,8 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=fig_size)
     width_ratios = [1] + ncols * [2]
     gs = gridspec.GridSpec(nrows, (ncols + 1),
-                           width_ratios=width_ratios)
-                           # wspace=0.5, hspace=0.10)
+                           width_ratios=width_ratios,
+                           wspace=0.4, hspace=0.3)
 
     x_label = r'Time / min'
     y_label = r'Particle counts'
@@ -79,7 +77,7 @@ if __name__ == '__main__':
     ax.set_title("Particle size")
     ax.annotate(y_label, xy=(1, 0.5),
                 xycoords=('axes fraction', 'figure fraction'),
-                xytext=(10, 0),
+                xytext=(10, 50),
                 textcoords='offset points',
                 ha='center', va='center',
                 rotation='vertical')
@@ -92,10 +90,10 @@ if __name__ == '__main__':
         # First column
         ax1 = plt.subplot(gs[i, 0])
         ax1.annotate(y_title, xy=(0.5, 0.5),
-                    xycoords=('axes fraction', 'axes fraction'),
-                    xytext=(0, 0),
-                    textcoords='offset points',
-                    size=11, ha='center', va='bottom')
+                     xycoords=('axes fraction', 'axes fraction'),
+                     xytext=(0, 0),
+                     textcoords='offset points',
+                     size=11, ha='center', va='bottom')
         ax1.axis('off')
 
         # Second column
@@ -116,7 +114,7 @@ if __name__ == '__main__':
 
         data_path = condition['sensor'][rebinned]['data']
         df1 = load_data(data_path)
-        df = concat(df,df1)
+        df = concat(df, df1)
 
         # Pick an axes
         ax3 = plt.subplot(gs[i, 2])
@@ -124,26 +122,32 @@ if __name__ == '__main__':
         # Plot timeseries
         plot(df, ax3)
 
-    fig.text(2/3, 0.00, x_label, ha='center', va='center')
+    # Taking axes from last row
+    # x label
+    ax3.annotate(x_label, xy=(0, 0),
+                 xycoords=('axes fraction', 'axes fraction'),
+                 xytext=(-20, -22),
+                 textcoords='offset points',
+                 ha='center', va='center')
 
-    kwargs = {"bbox_inches": "tight"}
+    # Legends
+    art = []
+    lines, labels = ax2.get_legend_handles_labels()
+    lgd = ax2.legend(lines, labels, loc=9, bbox_to_anchor=(0.5, -0.4), ncol=2,
+                     columnspacing=0.5)
+    art.append(lgd)
+    lines, labels = ax3.get_legend_handles_labels()
+    lgd = ax3.legend(lines, labels, loc=9, bbox_to_anchor=(0.5, -0.4), ncol=2,
+                     columnspacing=0.5)
+    art.append(lgd)
+
+    kwargs = {"additional_artists": art,
+              "bbox_inches": "tight"}
     settings['plots'] = {}
     settings['plots']['plot-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
     # Dump the plot path to json
     dump = json.dumps(settings, default=date_handler,
-                     sort_keys=True, indent=4).replace("\\\\", "/")
+                      sort_keys=True, indent=4).replace("\\\\", "/")
     with open(settings_file, 'w') as handle:
             handle.write(dump)
-
-
-#     lines, labels = ax.get_legend_handles_labels()
-    # # ax.legend(lines, labels, loc='upper center', mode='expand')
-    # art = []
-    # lgd = ax.legend(lines, labels, loc=9, bbox_to_anchor=(0.5, -0.2), ncol=2)
-    # art.append(lgd)
-    # kwargs = {"additional_artists": art,
-              # "bbox_inches": "tight"}
-
-    # path = saveplot(path, fig, **kwargs)
-
