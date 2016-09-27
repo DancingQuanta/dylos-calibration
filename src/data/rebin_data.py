@@ -133,11 +133,9 @@ if __name__ == '__main__':
 
         # Load data path
         calibrater_path = condition['sensor'][calibrater]['data']
-        calibratee_path = condition['sensor'][calibratee]['data']
 
         # Load data
         calibrater_data = load_data(calibrater_path)
-        calibratee_data = load_data(calibratee_path)
 
         # rebin calibrater dataset to match calibratee dataset
         rebinned = rebin(calibrater_data, calibrater_bins, calibratee_bins)
@@ -146,7 +144,7 @@ if __name__ == '__main__':
         condition['sensor'][name] = {'data': path}
         conditions[exp] = condition
 
-    settings['exp']['conditions'] = conditions 
+    settings['exp']['conditions'] = conditions
 
     # Output processed data
     dump = json.dumps(settings, default=date_handler,

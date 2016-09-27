@@ -17,7 +17,7 @@ DATA := $(shell find $(RAW)/ -name '*.log')
 YAML := $(shell find $(SETTINGS)/ -name '*.yaml')
 INTERIM_SETTINGS := $(patsubst $(SETTINGS)/%.yaml,$(INTERIM)/%.json,$(YAML))
 INTERIM_DATA := $(shell find $(INTERIM)/ -name '*.csv')
-CALIBRATE_FLAGS := $(patsubst $(INTERIM)/%.json,.calibrated-%,$(INTERIM_SETTINGS))
+REBINNED_FLAGS := $(patsubst $(INTERIM)/%.json,.rebinned-%,$(INTERIM_SETTINGS))
 
 PLOT_DATA := $(patsubst $(INTERIM)/%.csv,$(IMGS)/%-plot.png,$(INTERIM_DATA))
 PLOT_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-plot-mat.png,$(INTERIM_SETTINGS))
@@ -31,7 +31,7 @@ HIST_MAT_PDF := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%-hist-mat.pdf,$(INTER
 HIST_MAT_TEMPLATE := templates/hist_mat.tpl
 
 PROCESS_SCRIPT := src/data/process.py
-CALIBRATION_SCRIPT := src/data/calibration.py
+REBIN_SCRIPT := src/data/rebin_data.py
 PLOT_SCRIPT := src/visualisation/plot.py
 PLOT_MAT_SCRIPT := src/visualisation/plot_matrix.py
 HIST_SCRIPT := src/visualisation/hist.py
@@ -55,7 +55,7 @@ docs: requirements
 
 data: $(INTERIM_SETTINGS)
 
-calibrate: $(CALIBRATE_FLAGS)
+rebin: $(REBINNED_FLAGS)
 
 plot: $(PLOT_DATA)
 
@@ -83,15 +83,15 @@ lint:
 $(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
 	python $(PROCESS_SCRIPT) $< $(SENSORS) $(RAW) -o $@
 
-.calibrated-%: $(INTERIM)/%.json $(CALIBRATION_SCRIPT)
-	python $(CALIBRATION_SCRIPT) $<
-	touch .calibrated-$*
+.rebinned-%: $(INTERIM)/%.json $(REBIN_SCRIPT)
+	python $(REBIN_SCRIPT) $<
+	touch .rebinned-$*
 
 # Time series plots
 $(IMGS)/%-plot.png: $(INTERIM)/%.csv $(PLOT_SCRIPT)
 	python $(PLOT_SCRIPT) $< -o $@ -f $(FIG_SIZE)
 
-$(IMGS)/%-plot-mat.png: $(INTERIM)/%.json $(CALIBRATE_FLAGS) $(PLOT_MAT_SCRIPT)
+$(IMGS)/%-plot-mat.png: $(INTERIM)/%.json $(REBINNED_FLAGS) $(PLOT_MAT_SCRIPT)
 	python $(PLOT_MAT_SCRIPT) $< -o $@
 
 $(PROCESSED)/%-plot-mat.tex: $(INTERIM)/%.json $(PLOT_MAT_TEMPLATE) $(PLOT_MAT)
@@ -101,7 +101,7 @@ $(PROCESSED)/%-plot-mat.tex: $(INTERIM)/%.json $(PLOT_MAT_TEMPLATE) $(PLOT_MAT)
 $(IMGS)/%-hist.png $(PROCESSED)/%-hist.csv: $(INTERIM)/%.csv $(HIST_SCRIPT)
 	python $(HIST_SCRIPT) $< -p $(IMGS)/$*-hist.png -s $(PROCESSED)/$*-hist.csv -f $(FIG_SIZE)
 
-$(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(CALIBRATE_FLAGS) $(HIST_MAT_SCRIPT)
+$(IMGS)/%-hist-mat.png: $(INTERIM)/%.json $(REBINNED_FLAGS) $(HIST_MAT_SCRIPT)
 	python $(HIST_MAT_SCRIPT) $< -o $@
 
 $(PROCESSED)/%-hist-mat.tex: $(INTERIM)/%.json $(HIST_MAT_TEMPLATE) $(HIST_MAT)
