@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-import pandas as pd
 import argparse
 import json
 from utils import *
