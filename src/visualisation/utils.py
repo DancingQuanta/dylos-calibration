@@ -62,7 +62,8 @@ def saveplot(path, fig, **kwargs):
     filename = os.path.basename(path)
     ext = os.path.splitext(filename)[-1]
     name = os.path.splitext(filename)[0]
-    dir = os.path.abspath(os.path.dirname(path))
+    path = os.path.abspath(path)
+    dir = os.path.dirname(path)
     if not os.path.isdir(dir):
         os.makedirs(dir)
     if ext is not ".pgf":

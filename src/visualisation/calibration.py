@@ -69,6 +69,9 @@ def regression_table(dict, order, path):
     """
     Generate a latex table out of regression analysis of each particle size
     """
+    # Ensure absolute path
+    path = os.path.abspath(path)
+
     bins = ['0.5', '2.5']
     first = (r'\begin{tabular}{ccccccc}' + '\n'
              r'\multirow{2}{*}{Particle size} & ' +
@@ -97,6 +100,7 @@ def regression_table(dict, order, path):
 
     with open(path, 'w') as f:
         f.write(table)
+    return path.replace("\\", "/")
 
 
 if __name__ == '__main__':
@@ -211,8 +215,6 @@ if __name__ == '__main__':
 
         stats[exp] = {**reg_dict1, **reg_dict2}
 
-    # Add data collected for all experiments and write to file
-    latex = regression_table(stats, exp_order, stats_path)
 
     # Taking axes from last row
     # x label
@@ -227,6 +229,11 @@ if __name__ == '__main__':
         settings['plots'] = {}
     settings['plots']['cali-mat'] = saveplot(plot_path, fig, **kwargs)
     plt.close()
+
+    # Write regression results to file
+    if 'stats' not in settings:
+        settings['stats'] = {}
+    settings['stats']['cali'] = regression_table(stats, exp_order, stats_path)
 
     # Dump the json
     with open(settings_file, 'w') as handle:
