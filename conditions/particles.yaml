@@ -1,0 +1,15 @@
+parameter: |
+  Particle size / \si{\um}
+conditions:
+  "0.2":
+    parameter: 0.203
+  "0.3":
+    parameter: 0.298
+  "0.4":
+    parameter: 0.400
+  "0.8":
+    parameter: 0.799
+  "1":
+    parameter: 1.019
+  "2":
+    parameter: 1.999

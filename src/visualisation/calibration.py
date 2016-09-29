@@ -39,10 +39,12 @@ def calibrate(x, y, x_label, y_label, ax):
     # Create best fit line
     yf = polyval([slope, intercept], x)
     ax.plot(x, yf, label=fit_label)
-    ax.legend(loc='lower right')
+    # ax.legend(loc='lower right')
 
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
+    # ax.set_xlabel(x_label)
+    # ax.set_ylabel(y_label)
+    binsize = r"\SI{%s}{\um} Bin" % (bin)
+    return binsize
 
 
 def regression(x, y):
@@ -91,24 +93,32 @@ if __name__ == '__main__':
     ncols = 2
 
     # Fig size
-    fig_width = 2.5
-    fig_height = fig_width*0.8
+    fig_width = 2.8
+    golden_mean = (np.sqrt(5.0)-1.0) / 2.0
+    fig_height = fig_width * golden_mean
     width_ratios = [0.5] + ncols * [1]
     fig_size = [(fig_width * sum(width_ratios)), (fig_height * nrows)]
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
     gs = gridspec.GridSpec(nrows, (ncols + 1),
-                           width_ratios=width_ratios)
+                           width_ratios=width_ratios,
+                           wspace=0.5, hspace=0.3)
 
     # First column
     ax = plt.subplot(gs[0, 0])
-    ax.set_title("Particle size")
+    ax.set_title(exps['parameter'])
+    ax.annotate(y_label, xy=(1, 0.5),
+                xycoords=('axes fraction', 'figure fraction'),
+                xytext=(5, 10),
+                textcoords='offset points',
+                ha='center', va='center',
+                rotation='vertical')
 
     for i, exp in enumerate(exp_order):
         condition = conditions[exp]
         # Get name
-        y_title = r"\SI{%s}{\um}" % (exp)
+        y_title = condition['parameter']
 
         # First column
         ax1 = plt.subplot(gs[i, 0])
@@ -135,7 +145,7 @@ if __name__ == '__main__':
         ax2 = plt.subplot(gs[i, 1])
 
         # Calibrate and plot scatter
-        calibrate(x, y, x_label, y_label, ax2)
+        binsize1 = calibrate(x, y, x_label, y_label, ax2)
 
         # Second column
         x = calibratee_data[calibratee_data.columns[1]]
@@ -145,8 +155,20 @@ if __name__ == '__main__':
         ax3 = plt.subplot(gs[i, 2])
 
         # Calibrate and plot scatter
-        calibrate(x, y, x_label, y_label, ax3)
+        binsize2 = calibrate(x, y, x_label, y_label, ax3)
 
+        # First row
+        if i == 0:
+            ax2.set_title(binsize1)
+            ax3.set_title(binsize2)
+
+    # Taking axes from last row
+    # x label
+    ax3.annotate(x_label, xy=(0, 0),
+                 xycoords=('axes fraction', 'axes fraction'),
+                 xytext=(-20, -22),
+                 textcoords='offset points',
+                 ha='center', va='center')
 
     kwargs = {"bbox_inches": "tight"}
     if 'plots' not in settings:

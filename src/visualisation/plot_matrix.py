@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # First column
     ax = plt.subplot(gs[0, 0])
-    ax.set_title("Particle size")
+    ax.set_title(exps['parameter'])
     ax.annotate(y_label, xy=(1, 0.5),
                 xycoords=('axes fraction', 'figure fraction'),
                 xytext=(10, 50),
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     for i, exp in enumerate(exp_order):
         condition = conditions[exp]
         # Get name
-        y_title = r"\SI{%s}{\um}" % (exp)
+        y_title = condition['parameter']
 
         # First column
         ax1 = plt.subplot(gs[i, 0])

@@ -67,23 +67,25 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("settings", help="Settings yaml file")
     parser.add_argument("sensors", help="Sensors defintions yaml file")
+    parser.add_argument("particles", help="Particles")
     parser.add_argument("rawdatadir", help="Raw Data directory")
     parser.add_argument("-o", "--output",
                         help="Directs the output to a name of your choice")
 
     options = parser.parse_args()
-    settingsFile = options.settings    # Settings file
-    sensorsFile = options.sensors      # Sensor configuration file
-    raw_data_dir = options.rawdatadir  # Root directory of raw data
-    outputFile = options.output        # Output directory
+    settings_file = options.settings    # Settings file
+    sensors_file = options.sensors      # Sensor configuration file
+    particles_file = options.particles # Particles configuration file
+    raw_data_dir = options.rawdatadir   # Root directory of raw data
+    output_file = options.output         # Output directory
 
-    name = os.path.basename(settingsFile)
+    name = os.path.basename(settings_file)
     name = os.path.splitext(name)[0]
 
     # Create output directory
-    filename = os.path.basename(outputFile)
+    filename = os.path.basename(output_file)
     name = os.path.splitext(filename)[0]
-    path = os.path.abspath(os.path.dirname(outputFile))
+    path = os.path.abspath(os.path.dirname(output_file))
     output_dir = os.path.join(path, name)
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -92,27 +94,34 @@ if __name__ == '__main__':
     ureg = UnitRegistry()
 
     # Load settings yaml file
-    with open(settingsFile) as handle:
+    with open(settings_file) as handle:
         settings = yaml.load(handle)
 
     # Final particle concentration
     outputUnit = ureg(settings['output']['unit'])
 
-    # Sensors
-    sensors = settings['sensors']
-
     # Experimental conditions
     exps = settings['exp']
+
+    # Load particles definitions
+    with open(particles_file) as handle:
+        particles_definitions = yaml.load(handle)
 
     # Conditions
     order = exps['order']
     conditions = exps['conditions']
+    particles_conditions = particles_definitions['conditions']
+    exps['parameter'] = particles_definitions['parameter']
     # Add keys to conditions
     for a in list(conditions):
         conditions[a]['sensor'] = {}
+        conditions[a]['parameter'] = particles_conditions[a]['parameter']
+
+    # Sensors
+    sensors = settings['sensors']
 
     # Load sensors definitions
-    with open(sensorsFile) as handle:
+    with open(sensors_file) as handle:
         sensorDefinition = yaml.load(handle)
 
     debug = ("Loading sensor data")
@@ -279,5 +288,5 @@ if __name__ == '__main__':
     # Output processed data
     dump = json.dumps(settings, default=date_handler,
                       sort_keys=True, indent=4).replace("\\\\", "/")
-    with open(outputFile, 'w') as outfile:
+    with open(output_file, 'w') as outfile:
             outfile.write(dump)

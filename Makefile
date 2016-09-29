@@ -10,7 +10,8 @@ RAW := data/raw
 PROCESSED := data/processed
 INTERIM := data/interim
 IMGS := imgs/plots
-SENSORS := src/sensors/sensors.yaml
+SENSORS := conditions/sensors.yaml
+PARTICLES := conditions/particles.yaml
 SETTINGS := settings
 
 DATA := $(shell find $(RAW)/ -name '*.log')
@@ -60,6 +61,8 @@ docs: requirements
 
 data: $(INTERIM_SETTINGS)
 
+analyse: plotmat histmat calibrate
+
 rebin: $(REBINNED_FLAGS)
 
 plot: $(PLOT_DATA)
@@ -87,8 +90,8 @@ lint:
 # PROJECT RULES                                                                 #
 #################################################################################
 
-$(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(DATA) $(PROCESS_SCRIPT)
-	python $(PROCESS_SCRIPT) $< $(SENSORS) $(RAW) -o $@
+$(INTERIM)/%.json: $(SETTINGS)/%.yaml $(SENSORS) $(PARTICLES) $(DATA) $(PROCESS_SCRIPT)
+	python $(PROCESS_SCRIPT) $< $(SENSORS) $(PARTICLES) $(RAW) -o $@
 
 .rebinned-%: $(INTERIM)/%.json $(REBIN_SCRIPT)
 	python $(REBIN_SCRIPT) $<
