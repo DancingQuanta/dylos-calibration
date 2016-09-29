@@ -286,7 +286,7 @@ if __name__ == '__main__':
     exps['conditions'] = conditions
 
     # Output processed data
-    dump = json.dumps(settings, default=date_handler,
-                      sort_keys=True, indent=4).replace("\\\\", "/")
-    with open(output_file, 'w') as outfile:
-            outfile.write(dump)
+    with open(output_file, 'w') as handle:
+        json.dump(settings, handle, default=date_handler,
+                  sort_keys=True, indent=4)
+

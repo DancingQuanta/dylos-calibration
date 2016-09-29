@@ -147,7 +147,8 @@ if __name__ == '__main__':
     settings['exp']['conditions'] = conditions
 
     # Output processed data
-    dump = json.dumps(settings, default=date_handler,
-                      sort_keys=True, indent=4).replace("\\\\", "/")
     with open(settings_file, 'w') as handle:
-            handle.write(dump)
+        json.dump(settings, handle, default=date_handler,
+                  sort_keys=True, indent=4)
+
+

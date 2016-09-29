@@ -189,9 +189,8 @@ if __name__ == '__main__':
         settings['plots'] = {}
     settings['plots']['hist-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
-    # Dump the plot path to json
-    dump = json.dumps(settings, default=date_handler,
-                     sort_keys=True, indent=4).replace("\\\\", "/")
-    with open(settings_file, 'w') as handle:
-            handle.write(dump)
 
+    # Dump the json
+    with open(settings_file, 'w') as handle:
+        json.dump(settings, handle, default=date_handler,
+                  sort_keys=True, indent=4)

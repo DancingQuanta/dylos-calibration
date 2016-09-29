@@ -74,7 +74,7 @@ def saveplot(path, fig, **kwargs):
         fig.savefig(path, **kwargs)
     else:
         fig.savefig(path, **kwargs)
-    return path
+    return path.replace("\\", "/")
 
 
 def save_latex(df, path, kind, **kwargs):

@@ -178,8 +178,8 @@ if __name__ == '__main__':
         settings['plots'] = {}
     settings['plots']['cali-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
-    # Dump the plot path to json
-    dump = json.dumps(settings, default=date_handler,
-                      sort_keys=True, indent=4).replace("\\\\", "/")
+
+    # Dump the json
     with open(settings_file, 'w') as handle:
-            handle.write(dump)
+        json.dump(settings, handle, default=date_handler,
+                  sort_keys=True, indent=4)
