@@ -78,12 +78,13 @@ if __name__ == '__main__':
 
     # Fig size
     fig_width = 2
-    fig_height = 1.6
-    fig_size = [(fig_width * ncols), (fig_height * nrows)]
+    golden_mean = (np.sqrt(5.0)-1.0) / 2.0
+    fig_height = fig_width * golden_mean
+    width_ratios = [0.5] + ncols * [1]
+    fig_size = [(fig_width * sum(width_ratios)), (fig_height * nrows)]
 
     # Create matrix with first columns for particles
     fig = plt.figure(figsize=fig_size)
-    width_ratios = [1] + ncols * [2]
     gs = gridspec.GridSpec(nrows, (ncols + 1),
                            width_ratios=width_ratios,
                            wspace=0.5, hspace=0.10)
