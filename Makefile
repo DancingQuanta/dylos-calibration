@@ -35,6 +35,9 @@ CALI_MAT := $(patsubst $(INTERIM)/%.json,$(IMGS)/%-cali-mat.png,$(INTERIM_SETTIN
 CALI_MAT_PDF := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%-cali-mat.pdf,$(INTERIM_SETTINGS))
 CALI_MAT_TEMPLATE := templates/cali_mat.tpl
 
+FULL_REPORT := $(patsubst $(INTERIM)/%.json,$(PROCESSED)/%.pdf,$(INTERIM_SETTINGS))
+FULL_TEMPLATE := templates/calibration.tpl
+
 PROCESS_SCRIPT := src/data/process.py
 REBIN_SCRIPT := src/data/rebin_data.py
 PLOT_SCRIPT := src/visualisation/plot.py
@@ -61,7 +64,7 @@ docs: requirements
 
 data: $(INTERIM_SETTINGS)
 
-analyse: plotmat histmat calibrate
+analyse: $(FULL_REPORT)
 
 rebin: $(REBINNED_FLAGS)
 
@@ -123,6 +126,10 @@ $(IMGS)/%-cali-mat.png $(PROCESSED)/%-cali.tex: $(INTERIM)/%.json $(REBINNED_FLA
 
 $(PROCESSED)/%-cali-mat.tex: $(INTERIM)/%.json $(CALI_MAT_TEMPLATE) $(CALI_MAT)
 	python $(GEN_SCRIPT) $(CALI_MAT_TEMPLATE) $< $@ 
+
+# Overall
+$(PROCESSED)/%.tex: $(INTERIM)/%.json $(FULL_TEMPLATE) $(PLOT_MAT) $(HIST_MAT) $(CALI_MAT)
+	python $(GEN_SCRIPT) $(FULL_TEMPLATE) $< $@ 
 
 # Generate PDF from TIKZ
 %.pdf: %.tikz $(FIGURES)
