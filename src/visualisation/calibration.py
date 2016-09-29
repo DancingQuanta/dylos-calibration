@@ -84,9 +84,12 @@ if __name__ == '__main__':
     x_label = sensors[calibratee]['name']
     y_label = sensors[rebinned]['name']
 
+    # Experimental conditions
+    exps = settings['exp']
+
     # Conditions
-    exp_order = settings['exp']['order']
-    conditions = settings['exp']['conditions']
+    exp_order = exps['order']
+    conditions = exps['conditions']
 
     # Matrix dimension
     nrows = len(exp_order)
