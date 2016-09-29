@@ -75,12 +75,9 @@ if __name__ == '__main__':
     options = parser.parse_args()
     settings_file = options.settings    # Settings file
     sensors_file = options.sensors      # Sensor configuration file
-    particles_file = options.particles # Particles configuration file
+    particles_file = options.particles  # Particles configuration file
     raw_data_dir = options.rawdatadir   # Root directory of raw data
-    output_file = options.output         # Output directory
-
-    name = os.path.basename(settings_file)
-    name = os.path.splitext(name)[0]
+    output_file = options.output        # Output directory
 
     # Create output directory
     filename = os.path.basename(output_file)

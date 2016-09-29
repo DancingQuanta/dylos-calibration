@@ -118,8 +118,8 @@ $(PROCESSED)/%-hist-mat.tex: $(INTERIM)/%.json $(HIST_MAT_TEMPLATE) $(HIST_MAT)
 	python $(GEN_SCRIPT) $(HIST_MAT_TEMPLATE) $< $@ 
 
 # Calibration
-$(IMGS)/%-cali-mat.png: $(INTERIM)/%.json $(REBINNED_FLAGS) $(CALI_MAT_SCRIPT)
-	python $(CALI_MAT_SCRIPT) $< -o $@
+$(IMGS)/%-cali-mat.png $(PROCESSED)/%-cali.tex: $(INTERIM)/%.json $(REBINNED_FLAGS) $(CALI_MAT_SCRIPT)
+	python $(CALI_MAT_SCRIPT) $< -p $(IMGS)/$*-cali-mat.png -s $(PROCESSED)/$*-cali.tex
 
 $(PROCESSED)/%-cali-mat.tex: $(INTERIM)/%.json $(CALI_MAT_TEMPLATE) $(CALI_MAT)
 	python $(GEN_SCRIPT) $(CALI_MAT_TEMPLATE) $< $@ 

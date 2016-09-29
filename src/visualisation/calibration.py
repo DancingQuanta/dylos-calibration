@@ -44,7 +44,12 @@ def calibrate(x, y, x_label, y_label, ax):
     # ax.set_xlabel(x_label)
     # ax.set_ylabel(y_label)
     binsize = r"\SI{%s}{\um} Bin" % (bin)
-    return binsize
+    results_dict = {bin: {'slope': results[0],
+                          'slope error': results[1],
+                          'intercept': results[2],
+                          'intercept error': results[3],
+                          'rs': results[4]}}
+    return binsize, results_dict
 
 
 def regression(x, y):
@@ -60,16 +65,53 @@ def regression(x, y):
     return results
 
 
+def regression_table(dict, order, path):
+    """
+    Generate a latex table out of regression analysis of each particle size
+    """
+    bins = ['0.5', '2.5']
+    first = (r'\begin{tabular}{ccccccc}' + '\n'
+             r'\multirow{2}{*}{Particle size} & ' +
+             r'\multicolumn{3}{c}{\SI{0.5}{\um}} & ' +
+             r'\multicolumn{3}{c}{\SI{2.5}{\um}} \\' + '\n')
+    labels = ['Slope', 'Intercept', 'R-Squared']
+    second = ('& ' + ' & '.join(labels) + ' & ' +
+              ' & '.join(labels) + ' \\\\ \n \\toprule\n')
+
+    line = []
+    lines = []
+    # loop over particle sizes and bins
+    for x in order:
+        line += [x]
+        for y in bins:
+            a = dict[x][y]
+            slope = '$%.3f \\pm %.3f$' % (a['slope'], a['slope error'])
+            intercept = '$%.3f \\pm %.3f$' % (a['intercept'], a['intercept error'])
+            rs = '%.3f' % a['rs']
+            line += [slope, intercept, rs]
+        lines += ' & '.join(line) + ' \\\\ \n'
+        line = []
+
+    # Join parts of table together
+    table = first + second + ''.join(lines) + '\\bottomrule \n\\end{tabular}'
+
+    with open(path, 'w') as f:
+        f.write(table)
+
+
 if __name__ == '__main__':
     # Get filenames to work with
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("settings", help="Date file")
-    parser.add_argument("-o", "--output",
-                        help="Directs the output to a name of your choice")
+    parser.add_argument("-p", "--plot",
+                        help="Path to plot")
+    parser.add_argument("-s", "--stats",
+                        help="Path to statistics")
 
     options = parser.parse_args()
     settings_file = options.settings
-    output_file = options.output
+    plot_path = options.plot
+    stats_path = options.stats
 
     # Load settings json file
     with open(settings_file) as handle:
@@ -118,6 +160,8 @@ if __name__ == '__main__':
                 ha='center', va='center',
                 rotation='vertical')
 
+    reg_dict = {}
+    stats = {}
     for i, exp in enumerate(exp_order):
         condition = conditions[exp]
         # Get name
@@ -148,7 +192,7 @@ if __name__ == '__main__':
         ax2 = plt.subplot(gs[i, 1])
 
         # Calibrate and plot scatter
-        binsize1 = calibrate(x, y, x_label, y_label, ax2)
+        binsize1, reg_dict1 = calibrate(x, y, x_label, y_label, ax2)
 
         # Second column
         x = calibratee_data[calibratee_data.columns[1]]
@@ -158,12 +202,17 @@ if __name__ == '__main__':
         ax3 = plt.subplot(gs[i, 2])
 
         # Calibrate and plot scatter
-        binsize2 = calibrate(x, y, x_label, y_label, ax3)
+        binsize2, reg_dict2 = calibrate(x, y, x_label, y_label, ax3)
 
         # First row
         if i == 0:
             ax2.set_title(binsize1)
             ax3.set_title(binsize2)
+
+        stats[exp] = {**reg_dict1, **reg_dict2}
+
+    # Add data collected for all experiments and write to file
+    latex = regression_table(stats, exp_order, stats_path)
 
     # Taking axes from last row
     # x label
@@ -176,7 +225,7 @@ if __name__ == '__main__':
     kwargs = {"bbox_inches": "tight"}
     if 'plots' not in settings:
         settings['plots'] = {}
-    settings['plots']['cali-mat'] = saveplot(output_file, fig, **kwargs)
+    settings['plots']['cali-mat'] = saveplot(plot_path, fig, **kwargs)
     plt.close()
 
     # Dump the json
