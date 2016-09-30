@@ -3,7 +3,7 @@ sensors:
     path: "dylos-alpha/logs/prep/dylos1.log"
     type: dylos
   alpha:
-    path: "dylos-alpha/logs/prep/split-Alpha/Alpha"
+    path: "dylos-alpha/logs/prep/alpha.log"
     type: opcn2
     prunebins:
 sensor_order: ['dylos','alpha']
@@ -15,7 +15,7 @@ output:
   title: Aerosol calibration of Dylos and Alphasense OPCN2
   unit: 'count per cubic cm'
 exp:
-  order: ['1', '2']
+  order: ["0.2", "0.3", "0.4", "0.8", '1', '2']
   conditions:
     "2":
       start: 2016-09-08 8:00:00
@@ -26,3 +26,15 @@ exp:
     #"22":
         #start: 2016-09-09 7:40:00
         #end: 2016-09-09 8:10:00
+    "0.8":
+      start: 2016-09-16 13:15:00
+      end: 2016-09-16 13:35:00
+    "0.4":
+      start: 2016-09-16 14:25:00
+      end: 2016-09-16 15:05:00
+    "0.3":
+      start: 2016-09-16 15:45:00
+      end: 2016-09-16 16:15:00
+    "0.2":
+      start: 2016-09-19 08:30:00
+      end: 2016-09-19 09:30:00
