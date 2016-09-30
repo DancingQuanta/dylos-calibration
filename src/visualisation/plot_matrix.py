@@ -58,7 +58,7 @@ if __name__ == '__main__':
     ncols = 2
 
     # Fig size
-    fig_width = 3
+    fig_width = 2.3
     golden_mean = (np.sqrt(5.0)-1.0) / 2.0
     fig_height = fig_width * golden_mean
     width_ratios = [0.5] + ncols * [1]
