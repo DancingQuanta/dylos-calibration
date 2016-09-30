@@ -77,11 +77,11 @@ All data produced will be converted from their respective units to \VAR{output['
 \begin{tabular}{m{0.3\textwidth}CC}
 & \VAR{calibrater['name']} & \VAR{calibratee['name']} \\
 Number of size channels & 
-\VAR{calibrater['bins']['stringbins']|length} &
-\VAR{calibratee['bins']['stringbins']|length} \\
+\VAR{calibrater['bins'][:-1]|length} &
+\VAR{calibratee['bins'][:-1]|length} \\
 Channels &
-\VAR{calibrater['bins']['stringbins']|join} &
-\VAR{calibratee['bins']['stringbins']|join} \\
+\VAR{calibrater['bins'][:-1]|join('/ ')} &
+\VAR{calibratee['bins'][:-1]|join('/ ')} \\
 Input unit & 
 \VAR{calibrater['unit']} &
 \VAR{calibratee['unit']} \\
@@ -104,15 +104,30 @@ Scale factor of input unit to \VAR{output['unit']} &
 
 \section{Time series plot}
 
-\input{\VAR{plots['plot-mat']}}
+\begin{figure}[H]
+  \caption{}
+  \centering
+    \input{\VAR{plots['plot-mat']}}
+\end{figure}
 
 \section{Histograms}
 
-\input{\VAR{plots['hist-mat']}}
+\begin{figure}[H]
+  \caption{}
+  \centering
+    \input{\VAR{plots['hist-mat']}}
+\end{figure}
 
 \section{Calibration by regression}
 
-\input{\VAR{plots['cali-mat']}}
+\begin{figure}[H]
+  \caption{}
+  \centering
+    \input{\VAR{plots['cali-mat']}}
+\end{figure}
+
+\begin{center}
 \input{\VAR{stats['cali']}}
+\end{center}
 
 \end{document}
