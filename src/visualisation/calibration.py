@@ -149,7 +149,8 @@ if __name__ == '__main__':
 
 
     kwargs = {"bbox_inches": "tight"}
-    settings['plots'] = {}
+    if 'plots' not in settings:
+        settings['plots'] = {}
     settings['plots']['cali-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
     # Dump the plot path to json

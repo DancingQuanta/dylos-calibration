@@ -143,7 +143,8 @@ if __name__ == '__main__':
 
     kwargs = {"additional_artists": art,
               "bbox_inches": "tight"}
-    settings['plots'] = {}
+    if 'plots' not in settings:
+        settings['plots'] = {}
     settings['plots']['plot-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
     # Dump the plot path to json
