@@ -36,6 +36,9 @@ if __name__ == '__main__':
     settings_file = options.settings
     output_file = options.output
 
+    msg = "Time series plot matrix of %s" % (settings_file)
+    logging.debug(msg)
+
     # Load settings yaml file
     with open(settings_file) as handle:
         settings = json.load(handle)
@@ -83,7 +86,14 @@ if __name__ == '__main__':
                 ha='center', va='center',
                 rotation='vertical')
 
+    msg = "Looping over conditions"
+    logging.debug(msg)
+
     for i, exp in enumerate(exp_order):
+        msg = ("Index: %s, Condition: %s, "
+               "Calibrater: %s, Calibratee: %s") % (i, exp, calibrater,
+                                                    calibratee)
+        logging.debug(msg)
         condition = conditions[exp]
         # Get name
         y_title = condition['parameter']

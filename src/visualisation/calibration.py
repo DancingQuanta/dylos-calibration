@@ -117,6 +117,9 @@ if __name__ == '__main__':
     plot_path = options.plot
     stats_path = options.stats
 
+    msg = "Calibration of %s" % (settings_file)
+    logging.debug(msg)
+
     # Load settings json file
     with open(settings_file) as handle:
         settings = json.load(handle)
@@ -166,7 +169,13 @@ if __name__ == '__main__':
 
     reg_dict = {}
     stats = {}
+    msg = "Looping over conditions"
+    logging.debug(msg)
+
     for i, exp in enumerate(exp_order):
+        msg = ("Index: %s, Condition: %s, "
+               "Calibrater: %s, Calibratee: %s") % (i, exp, rebinned,
+                                                    calibratee)
         condition = conditions[exp]
         # Get name
         y_title = condition['parameter']
