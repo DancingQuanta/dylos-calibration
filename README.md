@@ -1,3 +1,4 @@
+
 Aerosol Measurement and Dylos calibration
 ==============================
 
@@ -30,23 +31,29 @@ Project Organization
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
     │                         generated with `pip freeze > requirements.txt`
     │
-    └── src                <- Source code for use in this project.
-        ├── __init__.py    <- Makes src a Python module
-        │
-        ├── data           <- Scripts to process data
-        │   └── inspect_data.py
-        │
-        ├── docs           <- Scripts for report generation
-        │   └── gen.py     <- Uses Jinja2 and a tamplate
-        │  
-        ├── modules        <- Own python modules
-        │   ├── __init__.py
-        │   ├── orderedDictYAML.py
-        │   └── tools.py
-        │
-        └── sensors        <- Scripts and details for individual sensors
-            ├── dylos.py
-            ├── dylos-plots.py
-            ├── grimm.py
-            └── sensors.yaml
+    ├── src                <- Source code for use in this project.
+    │   ├── __init__.py    <- Makes src a Python module
+    │   │
+    │   ├── data           <- Scripts to process data
+    │   │
+    │   ├── docs           <- Scripts for report generation
+    │   │   └── gen.py     <- Uses Jinja2 and a tamplate
+    │   │  
+    │   ├── visualisation  <- Analyse and visualise data
+    │   │
+    │   └── sensors        <- Scripts and details for individual sensors
+    │
+    ├── conditions         <- Store experimental conditions in yaml
+    │   ├── particles.yaml <- Particle size aliases and units
+    │   └── sensors.yaml   <- Characteristics of sensors
+    │ 
+    ├── settings           <- Store details about data for each experiment
+    │
+    └── templates          <- Jinja templates for displaying results
+
+
+Credits
+-------
+
+This project is part of a NERC's placement at University of Leeds during Summer of 2016.
 
