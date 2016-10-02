@@ -136,6 +136,9 @@ if __name__ == '__main__':
     stats_path = options.stats
     fig_size = options.figsize
 
+    msg = "Individual histogram of %s" % (data_path)
+    logging.debug(msg)
+
     debug = "Data: %s, Plot: %s, Stats: %s" % (data_path, plot_path, stats_path)
     logging.debug(debug)
 
