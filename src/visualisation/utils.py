@@ -5,6 +5,13 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib
+import logging
+
+logging.basicConfig(filename='log',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 
 # matplotlib settings
@@ -98,10 +105,12 @@ def save_latex(df, path, kind, **kwargs):
     ext = os.path.splitext(filename)[-1]
     filename = name + "-" + kind + ".tex"
     dir = os.path.dirname(path)
-    path = os.path.join(dir, filename)
-
+    # Create directory if does not exist
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    path = os.path.abspath(os.path.join(dir, filename))
     latex = df.to_latex(**kwargs)
-    with open(path, 'w') as f:
+    with open(path, 'w+') as f:
         f.write(latex)
 
 
@@ -168,18 +177,21 @@ def concat(df1, df2):
     Different length dataframes can be concatanced together, where the shorted
     index is used.
     """
+    columns1 = df1.columns
+    columns2 = df2.columns
+
     if len(df1) == len(df2):
-        print("Same")
+        debug = "df1: %s, df2: %s, Compare: %s" % (columns1, columns2, "Same")
         df2.index = df1.index
         df = df1.join(df2)
     elif len(df1) > len(df2):
-        print("df1 big")
+        debug = "df1: %s, df2: %s, Compare: %s" % (columns1, columns2, "df1 bigger")
         start = df2.index[0]
         end = df2.index[-1]
         df3 = df1.loc[start:end]
         df = df3.join(df2)
     elif len(df1) < len(df2):
-        print("df2 big")
+        debug = "df1: %s, df2: %s, Compare: %s" % (columns1, columns2, "df2 bigger")
         start = df1.index[0]
         end = df1.index[-1]
         df3 = df2.loc[start:end]
@@ -188,6 +200,7 @@ def concat(df1, df2):
         error = "Something not right!"
         print(error)
         sys.exit(2)
+    logging.debug(debug)
     return df
 
 
