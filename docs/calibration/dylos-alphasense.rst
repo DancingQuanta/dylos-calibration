@@ -4,8 +4,7 @@ Calibration of Dylos by Alphasense OPCN2
 Dylos Raspberry Pi
 ------------------
 
-The time is not set to local time because I kept forgetting it so I keep tract of time differences every morning.
-Time is offset by about 23 minutes which was due to accidentally pulling power out while preparing experiment.
+The time is not set to local time because I kept forgetting it so I keep track of time differences every morning.
 
 Timeline
 --------
@@ -100,3 +99,11 @@ Pi time 7:56 correct time 9:20
 
 09:15 Started pump
 09:45 Introduced 0.2um
+
+Notes
+-----
+
+The alphasense sensor was sampled every minute (sampling period 60 seconds) since start of experiments up to 09/09/16.
+This sampling period was found to be bad choice because the total counts of particles in a sample period have a maximum value and so is easily reached in environment with high concentration of particles.
+Thus on 15/09/16 and afterwards the sampling period is 10 seconds.
+
