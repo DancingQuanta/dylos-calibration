@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import argparse
 import json
+from collections import OrderedDict
 from utils import *
 import logging
+import pprint
 
 logging.basicConfig(filename='log',
                     filemode='a',
@@ -27,20 +29,106 @@ def histogram(df, bounds, ax):
         path : str
             Path for saved plots
     """
-    # Bin boundaries
-    lower = bounds[:-1]
-    upper = bounds[1:]
+    columns = ["lower", "upper", "width", "midpoint",
+               "loglower", "logupper", "logwidth", "logmidpoint",
+               'Counts', 'Cum Counts', 'Density', "dN/logD"]
+    df1 = pd.DataFrame(columns=columns)
 
-    # Take a mean of the input dataframe to form a histogram
-    counts = df.mean(axis=0).values
-    y = counts / (np.log10(upper) - np.log10(lower))
+    # Take a mean of the input dataframe which becomes a series with column
+    df1['Counts'] = df.mean(axis=0)
+    totalCounts = df1['Counts'].sum()
+
+    df1["lower"] = bounds[:-1]
+    df1["upper"] = bounds[1:]
+    df1["width"] = df1["upper"] - df1["lower"]
+    df1["midpoint"] = df1["width"]/2 + df1["lower"]
+    df1["loglower"] = np.log10(df1["lower"])
+    df1["logupper"] = np.log10(df1["upper"])
+    df1["logwidth"] = df1["logupper"] - df1["loglower"]
+    df1["logmidpoint"] = np.log10(df1["midpoint"])
+    df1["Density"] = df1["Counts"] / df1["width"]
+    df1["dN/logD"] = df1["Counts"] / df1["logwidth"]
+
+    # Iterate through the bins
+    bins = df1.index
+    cumCounts = 0
+    for ix, key in enumerate(bins):
+        counts = df1['Counts'].iloc[ix]
+        lower = df1['lower'].iloc[ix]
+        width = df1["width"].iloc[ix]
+
+        # Cumulative frequency
+        lowerCumCounts = cumCounts
+        cumCounts += counts
+        upperCumCounts = cumCounts
+        df1['Cum Counts'].iloc[ix] = cumCounts
+
+        # Median
+        if lowerCumCounts < totalCounts/2 < upperCumCounts:
+            median = lower + ((totalCounts/2 - lowerCumCounts)/counts) * width
+
+    # Statistics
+    counts = df1['Counts'].values
+    midpoints = df1["midpoint"].values
+    # logmidpoints = np.log10(midpoints)
+
+    # Normal distribution
+    mean, std, lower, upper = statistics(midpoints, counts)
+
+    # Log normal distribution
+    gm, gstd, glower, gupper = np.exp(statistics(np.log(midpoints), counts))
+
+    stats_dict = OrderedDict({'gmd': gm, 'gstd': gstd,
+                  'glower': glower, 'gupper': gupper})
+
+    index = ['Geometric mean diameter', 'Geometric standard deviation',
+             'Geometric 95% lower', 'Geometric 95% upper']
+    statsdata = [gm, std, glower, gupper]
+    statsdf = pd.DataFrame(statsdata, index=index)
 
     # Plot lognormal
-    x1 = lower  # left edge
-    x2 = upper  # right edge
+    x1 = df1["lower"].tolist()  # left edge
+    x2 = df1["upper"].tolist()  # right edge
     w = np.array(x2)-np.array(x1)  # variable width
+    y = df1["dN/logD"].tolist()
     ax.bar(x1, y, width=w)
     ax.set_xscale('log')
+
+    return stats_dict
+
+    # save_latex(statsdf, stats_path, "histstats", header=False)
+
+
+def table(dictionary):
+    try:
+        # Reform dictionary into multiindex compatible dict
+        reform = {(conditions_key, sensors_key, stats_key): [values]
+                  for conditions_key, sensors_dict in dictionary.items()
+                  for sensors_key,    stats_dict   in sensors_dict.items()
+                  for stats_key,      values       in stats_dict.items()}
+        logging.debug(pprint.pformat(reform))
+        # Create Multiindex DataFrame and transpose it
+        df = pd.DataFrame(reform)
+        df = df.T
+        # Set names of indexes
+        names = [r'Particle size/\si{um}', 'Sensors', '']
+        df.index.set_names(names, inplace=True)
+        logging.debug(df)
+        # Make statistics columns
+        unstack = df.unstack()
+        logging.debug(unstack)
+        # Rename columns
+        rename = {'gmd':    'Geometric Mean Diameter',
+                  'gstd':   'Geometric STD',
+                  'glower': 'Geometric lower 95%',
+                  'gupper': 'Geometric upper 95%'}
+        unstack = unstack.rename(columns=rename)
+        logging.debug(unstack)
+        order = ['Geometric mean diameter', 'Geometric standard deviation',
+                 'Geometric lower 95%', 'Geometric upper 95%']
+    except:
+        logging.exception('Got exception on main handler')
+        raise
 
 
 if __name__ == '__main__':
@@ -108,6 +196,10 @@ if __name__ == '__main__':
     msg = "Looping over conditions"
     logging.debug(msg)
 
+    exp_stats_dict = {}
+    exp_stats = pd.DataFrame(index=exp_order)
+    exp_stats.index.name = exps['parameter']
+
     for i, exp in enumerate(exp_order):
         msg = ("Index: %s, Condition: %s, "
                "Calibrater: %s, Calibratee: %s") % (i, exp, calibrater,
@@ -138,7 +230,7 @@ if __name__ == '__main__':
         ax2 = plt.subplot(gs[i, 1])
 
         # Histogram logdensity
-        histogram(df, bounds, ax2)
+        hist1 = histogram(df, bounds, ax2)
         ax2.xaxis.set_visible(False)
 
         # Third column
@@ -153,7 +245,7 @@ if __name__ == '__main__':
         ax3 = plt.subplot(gs[i, 2])
 
         # Histogram logdensity
-        histogram(df, bounds, ax3)
+        hist2 = histogram(df, bounds, ax3)
         ax3.xaxis.set_visible(False)
 
         # Fourth column
@@ -168,7 +260,7 @@ if __name__ == '__main__':
         ax4 = plt.subplot(gs[i, 3])
 
         # Histogram logdensity
-        histogram(df, bounds, ax4)
+        hist3 = histogram(df, bounds, ax4)
         ax4.xaxis.set_visible(False)
 
         # First row
@@ -194,12 +286,23 @@ if __name__ == '__main__':
                         # textcoords='offset points',
                         # ha='center', va='center')
 
+        try:
+            # Combine histogram stats
+            exp_stats_dict[exp] = {sensors[calibratee]['name']: hist1,
+                                   sensors[calibrater]['name']: hist2,
+                                   sensors[rebinned]['name']: hist3}
+
+        except:
+            logging.exception('Got exception on main handler')
+            raise
 
     kwargs = {"bbox_inches": "tight"}
     if 'plots' not in settings:
         settings['plots'] = {}
     settings['plots']['hist-mat'] = saveplot(output_file, fig, **kwargs)
     plt.close()
+
+    table(exp_stats_dict)
 
     # Dump the json
     with open(settings_file, 'w') as handle:
