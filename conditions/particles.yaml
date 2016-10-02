@@ -1,5 +1,4 @@
-parameter: |
-  Particle size / \si{\um}
+parameter: Particle size / \si{\um}
 conditions:
   "0.2":
     parameter: 0.203
